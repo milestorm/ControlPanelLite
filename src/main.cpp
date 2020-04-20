@@ -52,18 +52,22 @@ void processPush(int buttonId) {
 	}
 }
 
+// RED
 void butt0Click() {
 	processPush(0);
 }
 
+// GREEN
 void butt1Click() {
 	processPush(1);
 }
 
+// BLUE
 void butt2Click() {
 	processPush(2);
 }
 
+// YELLOW
 void butt3Click() {
 	processPush(3);
 }
