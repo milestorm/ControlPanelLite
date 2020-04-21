@@ -18,7 +18,7 @@ byte xicht_wink[] =    {8, 8, B00000000, B00100100, B01000100, B01000000, B01000
 byte xicht_sad[] =     {8, 8, B00000000, B01000000, B00101100, B00100000, B00100000, B00101100, B01000000, B00000000};
 byte xicht_default[] = {8, 8, B00000000, B00000000, B00101100, B00100000, B00100000, B00101100, B00000000, B00000000};
 
-byte xicht_smajlik[] = {8, 8, B00111100, B01101110, B11011011, B11011111, B11011111, B11011011, B01101110, B00111100};
+byte xicht_smajlik[] = {8, 8, B00000000, B00010110, B00100110, B01100000, B01100000, B00100110, B00010110, B00000000};
 
 byte numbers_score[] = {
   B01111100, B01000100, B01111100, B00000000, // 0 = 0
@@ -48,6 +48,7 @@ int gameType = -1;
 // ===========
 
 int activeLed = -1;
+int buttonGameScore = 0;
 
 void turnOnAllLeds() {
 	for (int i = 0; i < 4; i++) {
@@ -111,7 +112,7 @@ void printStringWithShift(char* s, int shift_speed){
   }
 }
 
-void writeScore(int scoreInput) {
+void writeScore(int scoreInput, bool scrollable = true) {
   byte finalSprite[10];
   int spritePos = 4;
   finalSprite[1] = 8;
@@ -140,12 +141,16 @@ void writeScore(int scoreInput) {
     }
 
   }
-
-  dot_matrix.writeSprite(spritePos+8, 0, finalSprite);
-  for (int i=0; i<8; i++){
-    dot_matrix.shiftLeft(false, false);
-    delay(100);
+  if (scrollable == true){
+    dot_matrix.writeSprite(spritePos+8, 0, finalSprite);
+    for (int i=0; i<8; i++){
+      dot_matrix.shiftLeft(false, false);
+      delay(100);
+    }
+  } else {
+    dot_matrix.writeSprite(spritePos, 0, finalSprite);
   }
+
 }
 
 // Adds a new random button to the game sequence, by sampling the timer
@@ -416,6 +421,7 @@ void processPush(int buttonId) {
       // button game
       turnOffAllLeds();
       printStringWithShift(start_message_buttons, 100);
+      writeScore(buttonGameScore, false);
       activeLed = turnOnRandomLed();
       break;
 
@@ -445,11 +451,22 @@ void processPush(int buttonId) {
     if (myLeds[buttonId].isPermanentOn()) {
       turnOffAllLeds();
       activeLed = turnOnRandomLed();
-      tone(BUZZER, 880, 100);
+      buttonGameScore += 1;
+      tone(BUZZER, NOTE_A5, 100);
+      delay(100);
+      tone(BUZZER, NOTE_C6, 200);
     } else {
       myLeds[activeLed].flashingOn();
-      tone(BUZZER, 220, 100);
+      buttonGameScore = 0;
+      tone(BUZZER, NOTE_A3, 400);
+      delay(400);
+      tone(BUZZER, NOTE_G3, 400);
+      delay(400);
+      tone(BUZZER, NOTE_C3, 400);
+      delay(400);
+      dot_matrix.clear();
     }
+    writeScore(buttonGameScore, false);
     break;
 
   case 1:
