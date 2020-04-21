@@ -26,6 +26,7 @@ MaxMatrix dot_matrix(DOTMATRIX_DIN, DOTMATRIX_CS, DOTMATRIX_CLK, DOTMATRIX_DISPL
 OneButton myButtons[] = {OneButton(BUTTON_RED, true), OneButton(BUTTON_GREEN, true), OneButton(BUTTON_BLUE, true), OneButton(BUTTON_YELLOW, true)};
 Flasher myLeds[] = {Flasher(LED_RED, 300, 300), Flasher(LED_GREEN, 300, 300), Flasher(LED_BLUE, 300, 300), Flasher(LED_YELLOW, 300, 300)};
 
+// matrix sprites
 byte xicht_happy[] =   {8, 8, B00000000, B00100000, B01001100, B01000000, B01000000, B01001100, B00100000, B00000000};
 byte xicht_wink[] =    {8, 8, B00000000, B00100100, B01000100, B01000000, B01000000, B01001100, B00100000, B00000000};
 byte xicht_sad[] =     {8, 8, B00000000, B01000000, B00101100, B00100000, B00100000, B00101100, B01000000, B00000000};
@@ -46,7 +47,7 @@ byte numbers_score[] = {
   B01011100, B01010100, B01111100, B00000000  // 9 = 36
 };
 
-// Scrollingtext helpers
+// Scrolling text
 byte buffer[10];
 char start_message_buttons[] =  " Buttons   ";
 char start_message_simon[] =    " Simon says   ";
@@ -96,7 +97,8 @@ int turnOnRandomLed() {
 }
 
 // ----------------------------------------------------------------
-// simon says
+// Simon says
+// ==========
 
 // Game state variables
 byte gameBoard[32]; //Contains the combination of buttons as we advance
