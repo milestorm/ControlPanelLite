@@ -1,7 +1,6 @@
 #ifndef Flasher_h
 #define Flasher_h
 
-#include "config.h"
 #include <Arduino.h>
 
 
