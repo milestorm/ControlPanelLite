@@ -1,2 +1,9 @@
 # ControlPanelLite
-Lite version of "ControlPanel" with 4 buttons and 8x8 led matrix
+
+Control Panel Lite by MileStorm
+made in 2019 - 2020
+
+Contains three games:
+ - Push the lit button
+ - Simon says
+ - Sound board

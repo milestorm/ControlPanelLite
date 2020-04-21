@@ -8,6 +8,19 @@
 #include <MaxMatrix.h>
 #include <avr/pgmspace.h>
 
+/*
+Control Panel Lite by MileStorm
+made in 2019 - 2020
+
+Contains four games:
+ - Push the lit button
+ - Simon says
+ - Sound board
+ - <not yet implemented>
+
+uses code for Simon says game from SparkFun Inventor's Kit: Example sketch 16
+*/
+
 MaxMatrix dot_matrix(DOTMATRIX_DIN, DOTMATRIX_CS, DOTMATRIX_CLK, DOTMATRIX_DISPLAY_COUNT);
 
 OneButton myButtons[] = {OneButton(BUTTON_RED, true), OneButton(BUTTON_GREEN, true), OneButton(BUTTON_BLUE, true), OneButton(BUTTON_YELLOW, true)};
@@ -590,3 +603,10 @@ void loop() {
     break;
   }
 }
+
+// TODO:
+/*
+u soundboardu udelat naky animace s virtualdelay
+array framu, ktery se zobrazej spolu se zvukem, kterej bude taky pres virtual delay
+efektu a animaci by bylo 8, protoze press a longpress
+*/
