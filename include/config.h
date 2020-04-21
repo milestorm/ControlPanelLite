@@ -25,5 +25,5 @@
 #define CHOICE_BLUE (1 << 2)
 #define CHOICE_YELLOW   (1 << 3)
 
-#define ROUNDS_TO_WIN      13 //Number of rounds to succesfully remember before you win. 13 is do-able.
+#define ROUNDS_TO_WIN      25 //Number of rounds to succesfully remember before you win. 13 is do-able.
 #define ENTRY_TIME_LIMIT   3000 //Amount of time to press a button before game times out. 3000ms = 3 sec
