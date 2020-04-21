@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <config.h>
+#include <matrixchars.h>
+#include <tones.h>
 #include <flasher.h>
 #include <OneButton.h>
 #include <tools.h>
