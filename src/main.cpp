@@ -34,6 +34,7 @@ byte xicht_default[] = {8, 8, B00000000, B00000000, B00101100, B00100000, B00100
 
 byte xicht_smajlik[] = {8, 8, B00000000, B00010110, B00100110, B01100000, B01100000, B00100110, B00010110, B00000000};
 
+// small score numbers: up to number 99 on display
 byte numbers_score[] = {
   B01111100, B01000100, B01111100, B00000000, // 0 = 0
   B00000000, B00001000, B01111100, B00000000, // 1 = 4
@@ -46,15 +47,59 @@ byte numbers_score[] = {
   B01111100, B01010100, B01111100, B00000000, // 8 = 32
   B01011100, B01010100, B01111100, B00000000  // 9 = 36
 };
+// animation definitions
+const uint64_t ANIM_lines[] PROGMEM = {
+  0x1818181818181818,
+  0x0c0c181818183030,
+  0x060c0c1818303060,
+  0x03060c18183060c0,
+  0x0001071e78e08000,
+  0x0000033ffcc00000,
+  0x000000ffff000000,
+  0x0000c0fc3f030000,
+  0x0080e0781e070100,
+  0x80c060381c060301,
+  0x60303018180c0c06,
+  0x3030181818180c0c
+};
+const int ANIM_lines_length = sizeof(ANIM_lines)/8;
 
 // Scrolling text
 byte buffer[10];
-char start_message_buttons[] =  " Buttons   ";
+char start_message_easybuttons[] =  " Easy Buttons   ";
+char start_message_timedbuttons[] =    " Timed Buttons   ";
 char start_message_simon[] =    " Simon says   ";
 char start_message_soundboard[] =    " Soundboard   ";
 
-// gameType: menu -1, mashbutton 0, simon 1, soundboard 2,
+// gameType: menu -1, easybutton 0, simon 1, soundboard 2,  timedbutton 3
 int gameType = -1;
+
+// ----------------------------------------------------------------
+// misc functions
+
+void displayImage(uint64_t image) {
+  for (int i = 0; i < 8; i++) {
+    byte row = (image >> i * 8) & 0xFF;
+    for (int j = 0; j < 8; j++) {
+      dot_matrix.setDot(i, j, bitRead(row, j));
+    }
+  }
+}
+
+void runAnimation(const uint64_t *animArray, const int animLength, int cyclesCount = 1, int frameDelay = 100){
+  uint64_t image;
+  for (int j = 0; j < cyclesCount; j++){
+    for (int i = 0; i < animLength; i++){
+      memcpy_P(&image, &animArray[i], 8);
+
+      displayImage(image);
+      if (++i >= animLength ) {
+        i = 0;
+      }
+      delay(frameDelay); // predelat na nonblocking delay
+    }
+  }
+}
 
 // --------------------------------------------------------------------------------
 
@@ -433,9 +478,9 @@ void processPush(int buttonId) {
     // inits of games
     switch (buttonId){
     case 0:
-      // button game
+      // easy buttons game
       turnOffAllLeds();
-      printStringWithShift(start_message_buttons, 100);
+      printStringWithShift(start_message_easybuttons, 100);
       writeScore(buttonGameScore, false);
       activeLed = turnOnRandomLed();
       break;
@@ -449,11 +494,13 @@ void processPush(int buttonId) {
     case 2:
       // sound board
       turnOffAllLeds();
+      printStringWithShift(start_message_soundboard, 100);
       break;
 
     case 3:
-      // not yet implemented
+      // timed buttons game
       turnOffAllLeds();
+      printStringWithShift(start_message_timedbuttons, 100);
       break;
 
     default:
@@ -461,8 +508,9 @@ void processPush(int buttonId) {
     }
     break;
 
+  // every other push in game
   case 0:
-    // button game
+    // easy buttons game
     if (myLeds[buttonId].isPermanentOn()) {
       turnOffAllLeds();
       activeLed = turnOnRandomLed();
@@ -494,7 +542,8 @@ void processPush(int buttonId) {
     break;
 
   case 3:
-    // not yet implemented
+    // timed buttons game
+    runAnimation(ANIM_lines, ANIM_lines_length, 10, 50);
   break;
 
   default:
