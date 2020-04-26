@@ -71,7 +71,7 @@ const uint64_t ANIM_lines[] PROGMEM = {
   0x60303018180c0c06,
   0x3030181818180c0c
 };
-const int ANIM_lines_length = sizeof(ANIM_lines)/8;
+int ANIM_lines_length = sizeof(ANIM_lines)/8;
 
 const uint64_t ANIM_bomb[] PROGMEM = {
   0x0000000000000018,
@@ -91,7 +91,7 @@ const uint64_t ANIM_bomb[] PROGMEM = {
   0x000000000050810a,
   0x0000000000000000
 };
-const int ANIM_bomb_length = sizeof(ANIM_bomb)/8;
+int ANIM_bomb_length = sizeof(ANIM_bomb)/8;
 
 const uint64_t ANIM_beacon[] PROGMEM = {
   0x7e7e7e7e3c180000,
@@ -102,7 +102,7 @@ const uint64_t ANIM_beacon[] PROGMEM = {
   0x5e5e5e5e2c180000,
   0x3e3e3e3e1c180000
 };
-const int ANIM_beacon_length = sizeof(ANIM_beacon)/8;
+int ANIM_beacon_length = sizeof(ANIM_beacon)/8;
 
 const uint64_t ANIM_gun[] PROGMEM = {
   0x00060e167e7d0000,
@@ -123,7 +123,7 @@ const uint64_t ANIM_gun[] PROGMEM = {
   0x0000000107070000,
   0x000103051f1f0000
 };
-const int ANIM_gun_length = sizeof(ANIM_gun)/8;
+int ANIM_gun_length = sizeof(ANIM_gun)/8;
 
 const uint64_t ANIM_laser[] PROGMEM = {
   0x0102028241404080,
@@ -138,7 +138,7 @@ const uint64_t ANIM_laser[] PROGMEM = {
   0x0102c28241434080,
   0x0102828241414080
 };
-const int ANIM_laser_length = sizeof(ANIM_laser)/8;
+int ANIM_laser_length = sizeof(ANIM_laser)/8;
 
 const uint64_t ANIM_pulsating[] PROGMEM = {
   0x8100000000000081,
@@ -150,7 +150,7 @@ const uint64_t ANIM_pulsating[] PROGMEM = {
   0x0018244242241800,
   0x1842008181004218
 };
-const int ANIM_pulsating_length = sizeof(ANIM_pulsating)/8;
+int ANIM_pulsating_length = sizeof(ANIM_pulsating)/8;
 
 const uint64_t ANIM_fx1[] PROGMEM = {
   0x0101010101010101,
@@ -189,7 +189,7 @@ const uint64_t ANIM_fx1[] PROGMEM = {
   0x1800000000000000,
   0x0000000000000000
 };
-const int ANIM_fx1_length = sizeof(ANIM_fx1)/8;
+int ANIM_fx1_length = sizeof(ANIM_fx1)/8;
 
 
 const uint64_t ANIM_FACE_lol[] PROGMEM = {
@@ -205,7 +205,7 @@ const uint64_t ANIM_FACE_lol[] PROGMEM = {
   0x3c427e4200666600,
   0x003c7e4200666600
 };
-const int ANIM_FACE_lol_length = sizeof(ANIM_FACE_lol)/8;
+int ANIM_FACE_lol_length = sizeof(ANIM_FACE_lol)/8;
 
 const uint64_t ANIM_FACE_sad[] PROGMEM = {
   0x00003c0000666600,
@@ -224,7 +224,7 @@ const uint64_t ANIM_FACE_sad[] PROGMEM = {
   0x00423c0066000000,
   0x00423c0066000000
 };
-const int ANIM_FACE_sad_length = sizeof(ANIM_FACE_sad)/8;
+int ANIM_FACE_sad_length = sizeof(ANIM_FACE_sad)/8;
 
 
 
@@ -259,9 +259,92 @@ void runAnimation(const uint64_t *animArray, const int animLength, int cyclesCou
       delay(frameDelay); // predelat na nonblocking delay
     }
   }
-  //dot_matrix.clear();
 }
 
+class DotMatrixAnimation {
+  bool isAnimating = false;
+
+  const uint64_t *animArray;
+  int animLength;
+  int cyclesCount;
+  int frameDelay;
+
+  bool isInfinite = false;
+
+  // counter helpers
+  int cyclesIndex = 0;
+  int animIndex = 0;
+
+  VirtualDelay animDelay; // initialize virtual delay
+
+  private:
+  void displayImage(uint64_t image) {
+    for (int i = 0; i < 8; i++) {
+      byte row = (image >> i * 8) & 0xFF;
+      for (int j = 0; j < 8; j++) {
+        dot_matrix.setDot(j, i, bitRead(row, j));
+      }
+    }
+  }
+
+  public:
+  DotMatrixAnimation(const uint64_t *_animArray, int _animLength, int _frameDelay = 100){
+    animArray = _animArray;
+    animLength = _animLength;
+    frameDelay = _frameDelay;
+  }
+
+  bool isRunning() {
+    return isAnimating;
+  }
+
+  void setInfinite(bool value = true) {
+    isInfinite = value;
+  }
+
+  void start(int _cyclesCount = 1) {
+    cyclesCount = _cyclesCount;
+    isAnimating = true;
+  }
+
+  void stop() {
+    isAnimating = false;
+  }
+
+  void tick() {
+    if (isAnimating == true) {
+      animDelay.start(frameDelay);
+      if (animDelay.elapsed()) {
+
+        uint64_t image;
+
+        memcpy_P(&image, &animArray[this->animIndex], 8);
+        displayImage(image);
+
+        if (animIndex < animLength - 1) {
+          animIndex++;
+        } else {
+          if (isInfinite) {
+            animIndex = 0;
+          } else {
+            if (cyclesIndex == cyclesCount - 1) {
+              isAnimating = false;
+            }
+            animIndex = 0;
+            cyclesIndex++;
+          }
+
+        }
+
+      }
+    }
+  }
+
+
+
+};
+
+DotMatrixAnimation animation_intro(ANIM_pulsating, ANIM_pulsating_length);
 
 void sound_fx1_update() {
   if (doSound == true) {
@@ -656,6 +739,7 @@ void processPush(int buttonId) {
     switch (buttonId){
     case 0:
       // easy buttons game
+      animation_intro.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_easybuttons, 100);
       writeScore(buttonGameScore, false);
@@ -664,18 +748,21 @@ void processPush(int buttonId) {
 
     case 1:
       // simon
+      animation_intro.stop();
       turnOffAllLeds();
       play_intro();
       break;
 
     case 2:
       // sound board
+      animation_intro.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_soundboard, 100);
       break;
 
     case 3:
       // timed buttons game
+      animation_intro.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_timedbuttons, 100);
       break;
@@ -768,8 +855,9 @@ void setup() {
   dot_matrix.setIntensity(3); // dot matix intensity 0-15
   // bootup
   turnOnAllLeds();
-  delay(1000);
-  dot_matrix.writeSprite(0, 0, xicht_default);
+
+  animation_intro.setInfinite();
+  animation_intro.start();
   tone(BUZZER, NOTE_E5, 100);
   delay(100);
   tone(BUZZER, NOTE_E6, 400);
@@ -835,9 +923,7 @@ void loop() {
       myLeds[i].tick();
     }
 
-    delay1.start(400);
-    if(delay1.elapsed()){
-    }
+    animation_intro.tick();
     break;
   }
 }
