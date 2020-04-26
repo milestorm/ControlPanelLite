@@ -7,6 +7,7 @@
 #include <tools.h>
 #include <MaxMatrix.h>
 #include <avr/pgmspace.h>
+#include <avdweb_VirtualDelay.h>
 
 /*
 Control Panel Lite by MileStorm
@@ -26,13 +27,21 @@ MaxMatrix dot_matrix(DOTMATRIX_DIN, DOTMATRIX_CS, DOTMATRIX_CLK, DOTMATRIX_DISPL
 OneButton myButtons[] = {OneButton(BUTTON_RED, true), OneButton(BUTTON_GREEN, true), OneButton(BUTTON_BLUE, true), OneButton(BUTTON_YELLOW, true)};
 Flasher myLeds[] = {Flasher(LED_RED, 300, 300), Flasher(LED_GREEN, 300, 300), Flasher(LED_BLUE, 300, 300), Flasher(LED_YELLOW, 300, 300)};
 
-// matrix sprites
-byte xicht_happy[] =   {8, 8, B00000000, B00100000, B01001100, B01000000, B01000000, B01001100, B00100000, B00000000};
-byte xicht_wink[] =    {8, 8, B00000000, B00100100, B01000100, B01000000, B01000000, B01001100, B00100000, B00000000};
-byte xicht_sad[] =     {8, 8, B00000000, B01000000, B00101100, B00100000, B00100000, B00101100, B01000000, B00000000};
-byte xicht_default[] = {8, 8, B00000000, B00000000, B00101100, B00100000, B00100000, B00101100, B00000000, B00000000};
+VirtualDelay delay1, delay2, delay3, delay4, delay5, delay6;
 
-byte xicht_smajlik[] = {8, 8, B00000000, B00010110, B00100110, B01100000, B01100000, B00100110, B00010110, B00000000};
+bool doSound = false;
+
+// matrix sprites
+byte xicht_default[] = {8, 8,
+  B00000000,
+  B00000110,
+  B00010110,
+  B00100000,
+  B00100000,
+  B00010110,
+  B00000110,
+  B00000000
+};
 
 // small score numbers: up to number 99 on display
 byte numbers_score[] = {
@@ -64,6 +73,161 @@ const uint64_t ANIM_lines[] PROGMEM = {
 };
 const int ANIM_lines_length = sizeof(ANIM_lines)/8;
 
+const uint64_t ANIM_bomb[] PROGMEM = {
+  0x0000000000000018,
+  0x000000000000183c,
+  0x0000000000183c3c,
+  0x00000000183c3c3c,
+  0x000000183c3c3c3c,
+  0x0000183c3c3c3c00,
+  0x00183c3c3c3c0000,
+  0x183c3c3c3c000000,
+  0x3c3c3c3c00000000,
+  0x3c7e341c00000000,
+  0x3c5ae60001000000,
+  0x3c5af62881000000,
+  0x1818b166118a4000,
+  0x0000099421025024,
+  0x000000000050810a,
+  0x0000000000000000
+};
+const int ANIM_bomb_length = sizeof(ANIM_bomb)/8;
+
+const uint64_t ANIM_beacon[] PROGMEM = {
+  0x7e7e7e7e3c180000,
+  0x7c7c7c7c385a8124,
+  0x7a7a7a7a345a8124,
+  0x7676767634992442,
+  0x6e6e6e6e2c992442,
+  0x5e5e5e5e2c180000,
+  0x3e3e3e3e1c180000
+};
+const int ANIM_beacon_length = sizeof(ANIM_beacon)/8;
+
+const uint64_t ANIM_gun[] PROGMEM = {
+  0x00060e167e7d0000,
+  0x00060e167e7d0000,
+  0x00060e167e7d0000,
+  0x00060e167e7e0000,
+  0x000103051f1f0000,
+  0x0000000107070000,
+  0x0000000001010000,
+  0x0000000203030000,
+  0x0000040205030400,
+  0x0008040009010408,
+  0x1008000011010000,
+  0x0000000021010000,
+  0x0000000041010000,
+  0x0000000081010000,
+  0x0000000001010000,
+  0x0000000107070000,
+  0x000103051f1f0000
+};
+const int ANIM_gun_length = sizeof(ANIM_gun)/8;
+
+const uint64_t ANIM_laser[] PROGMEM = {
+  0x0102028241404080,
+  0x01030283c140c080,
+  0x01030383c1c0c080,
+  0x0102078241e04080,
+  0x01020f8241f04080,
+  0x01021e8241784080,
+  0x01023a82415c4080,
+  0x01027282414e4080,
+  0x0102e28241474080,
+  0x0102c28241434080,
+  0x0102828241414080
+};
+const int ANIM_laser_length = sizeof(ANIM_laser)/8;
+
+const uint64_t ANIM_pulsating[] PROGMEM = {
+  0x8100000000000081,
+  0x8142000000004281,
+  0x0042240000244200,
+  0x0000241818240000,
+  0x0000001818000000,
+  0x0000183c3c180000,
+  0x0018244242241800,
+  0x1842008181004218
+};
+const int ANIM_pulsating_length = sizeof(ANIM_pulsating)/8;
+
+const uint64_t ANIM_fx1[] PROGMEM = {
+  0x0101010101010101,
+  0x0103030303030301,
+  0x0103070707070301,
+  0x0103070f0f070301,
+  0x0002061e1e060200,
+  0x0000243c3c240000,
+  0x0040607878604000,
+  0x80c0e0f0f0e0c080,
+  0x80c0e0e0e0e0c080,
+  0x80c0c0c0c0c0c080,
+  0x8080808080808080,
+  0x4040808080808080,
+  0x0020204040408080,
+  0x0010102020404080,
+  0x0000081020204080,
+  0x0000040810204080,
+  0x0000000408304080,
+  0x0000000006186080,
+  0x00000000000638c0,
+  0x00000000000003fc,
+  0x00000000000000ff,
+  0x00000000000081ff,
+  0x000000000081c3ff,
+  0x0000000081c3e7ff,
+  0x00000081c3e7ff7e,
+  0x000081c3e7ff7e3c,
+  0x0081c3e7ff7e3c18,
+  0x81c3e7ff7e3c1800,
+  0xc3e7ff7e3c180000,
+  0xe7ff7e3c18000000,
+  0xff7e3c1800000000,
+  0x7e3c180000000000,
+  0x3c18000000000000,
+  0x1800000000000000,
+  0x0000000000000000
+};
+const int ANIM_fx1_length = sizeof(ANIM_fx1)/8;
+
+
+const uint64_t ANIM_FACE_lol[] PROGMEM = {
+  0x00003c4200666600,
+  0x003c7e4200660000,
+  0x3c427e4200006600,
+  0x003c427e42006600,
+  0x3c427e4200660000,
+  0x003c427e42006600,
+  0x3c427e4200660000,
+  0x003c427e42006600,
+  0x3c427e4200006600,
+  0x3c427e4200666600,
+  0x003c7e4200666600
+};
+const int ANIM_FACE_lol_length = sizeof(ANIM_FACE_lol)/8;
+
+const uint64_t ANIM_FACE_sad[] PROGMEM = {
+  0x00003c0000666600,
+  0x0018241800666600,
+  0x0018241800666600,
+  0x0018241800666600,
+  0x0018241800666600,
+  0x0018241800660000,
+  0x00423c0066000000,
+  0x00423c0066000000,
+  0x00423c0066000000,
+  0x00423c0066000000,
+  0x0000423c00660000,
+  0x00423c0066000000,
+  0x00423c0066000000,
+  0x00423c0066000000,
+  0x00423c0066000000
+};
+const int ANIM_FACE_sad_length = sizeof(ANIM_FACE_sad)/8;
+
+
+
 // Scrolling text
 byte buffer[10];
 char start_message_easybuttons[] =  " Easy Buttons   ";
@@ -81,7 +245,7 @@ void displayImage(uint64_t image) {
   for (int i = 0; i < 8; i++) {
     byte row = (image >> i * 8) & 0xFF;
     for (int j = 0; j < 8; j++) {
-      dot_matrix.setDot(i, j, bitRead(row, j));
+      dot_matrix.setDot(j, i, bitRead(row, j));
     }
   }
 }
@@ -91,12 +255,25 @@ void runAnimation(const uint64_t *animArray, const int animLength, int cyclesCou
   for (int j = 0; j < cyclesCount; j++){
     for (int i = 0; i < animLength; i++){
       memcpy_P(&image, &animArray[i], 8);
-
       displayImage(image);
-      if (++i >= animLength ) {
-        i = 0;
-      }
       delay(frameDelay); // predelat na nonblocking delay
+    }
+  }
+  //dot_matrix.clear();
+}
+
+
+void sound_fx1_update() {
+  if (doSound == true) {
+    tone(BUZZER, 800, 100);
+    delay(150);
+    tone(BUZZER, 1000, 100);
+    delay(150);
+    tone(BUZZER, 1200, 100);
+    delay(150);
+    for (int i = 2200 - 1; i >= 1000; i=i-10){
+      tone(BUZZER, i, 5);
+      delay(5);
     }
   }
 }
@@ -216,7 +393,7 @@ void writeScore(int scoreInput, bool scrollable = true) {
 // Adds a new random button to the game sequence, by sampling the timer
 void add_to_moves(void)
 {
-  byte newButton = random(0, 4); //min (included), max (exluded)
+  byte newButton = randomGenerator(0, 4); //min (included), max (exluded)
 
   // We have to convert this number, 0 to 3, to CHOICEs
   if(newButton == 0) newButton = CHOICE_RED;
@@ -375,8 +552,8 @@ boolean play_memory(void)
       if (choice != gameBoard[currentMove]) return false; // If the choice is incorect, player loses
     }
 
-    dot_matrix.writeSprite(0, 0, xicht_happy);
-    delay(1000); // Player was correct, delay before playing moves
+    // Player was correct, delay before playing moves
+    runAnimation(ANIM_FACE_lol, ANIM_FACE_lol_length);
     dot_matrix.writeSprite(0, 0, xicht_default);
   }
 
@@ -543,7 +720,13 @@ void processPush(int buttonId) {
 
   case 3:
     // timed buttons game
-    runAnimation(ANIM_lines, ANIM_lines_length, 10, 50);
+    runAnimation(ANIM_fx1, ANIM_fx1_length, 1, 50);
+    runAnimation(ANIM_FACE_sad, ANIM_FACE_sad_length);
+    runAnimation(ANIM_FACE_lol, ANIM_FACE_lol_length);
+    runAnimation(ANIM_gun, ANIM_gun_length, 2);
+    runAnimation(ANIM_laser, ANIM_laser_length);
+    runAnimation(ANIM_lines, ANIM_lines_length);
+    runAnimation(ANIM_pulsating, ANIM_pulsating_length, 3);
   break;
 
   default:
@@ -586,7 +769,7 @@ void setup() {
   // bootup
   turnOnAllLeds();
   delay(1000);
-  dot_matrix.writeSprite(0, 0, xicht_smajlik);
+  dot_matrix.writeSprite(0, 0, xicht_default);
   tone(BUZZER, NOTE_E5, 100);
   delay(100);
   tone(BUZZER, NOTE_E6, 400);
@@ -638,8 +821,8 @@ void loop() {
       writeScore(gameRound-1);
     }
     else {
-      dot_matrix.writeSprite(0, 0, xicht_sad);
       play_loser(); // Player lost, play loser tones
+      runAnimation(ANIM_FACE_sad, ANIM_FACE_sad_length);
       dot_matrix.clear();
       writeScore(gameRound-1);
     }
@@ -650,6 +833,10 @@ void loop() {
     for (int i = 0; i < 4; i++){
       myButtons[i].tick();
       myLeds[i].tick();
+    }
+
+    delay1.start(400);
+    if(delay1.elapsed()){
     }
     break;
   }
