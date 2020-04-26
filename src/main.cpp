@@ -71,7 +71,7 @@ const uint64_t ANIM_lines[] PROGMEM = {
   0x60303018180c0c06,
   0x3030181818180c0c
 };
-int ANIM_lines_length = sizeof(ANIM_lines)/8;
+int ANIM_lines_len = sizeof(ANIM_lines)/8;
 
 const uint64_t ANIM_bomb[] PROGMEM = {
   0x0000000000000018,
@@ -91,7 +91,7 @@ const uint64_t ANIM_bomb[] PROGMEM = {
   0x000000000050810a,
   0x0000000000000000
 };
-int ANIM_bomb_length = sizeof(ANIM_bomb)/8;
+int ANIM_bomb_len = sizeof(ANIM_bomb)/8;
 
 const uint64_t ANIM_beacon[] PROGMEM = {
   0x7e7e7e7e3c180000,
@@ -102,7 +102,7 @@ const uint64_t ANIM_beacon[] PROGMEM = {
   0x5e5e5e5e2c180000,
   0x3e3e3e3e1c180000
 };
-int ANIM_beacon_length = sizeof(ANIM_beacon)/8;
+int ANIM_beacon_len = sizeof(ANIM_beacon)/8;
 
 const uint64_t ANIM_gun[] PROGMEM = {
   0x00060e167e7d0000,
@@ -123,7 +123,7 @@ const uint64_t ANIM_gun[] PROGMEM = {
   0x0000000107070000,
   0x000103051f1f0000
 };
-int ANIM_gun_length = sizeof(ANIM_gun)/8;
+int ANIM_gun_len = sizeof(ANIM_gun)/8;
 
 const uint64_t ANIM_laser[] PROGMEM = {
   0x0102028241404080,
@@ -138,7 +138,7 @@ const uint64_t ANIM_laser[] PROGMEM = {
   0x0102c28241434080,
   0x0102828241414080
 };
-int ANIM_laser_length = sizeof(ANIM_laser)/8;
+int ANIM_laser_len = sizeof(ANIM_laser)/8;
 
 const uint64_t ANIM_pulsating[] PROGMEM = {
   0x8100000000000081,
@@ -150,7 +150,7 @@ const uint64_t ANIM_pulsating[] PROGMEM = {
   0x0018244242241800,
   0x1842008181004218
 };
-int ANIM_pulsating_length = sizeof(ANIM_pulsating)/8;
+int ANIM_pulsating_len = sizeof(ANIM_pulsating)/8;
 
 const uint64_t ANIM_fx1[] PROGMEM = {
   0x0101010101010101,
@@ -189,7 +189,18 @@ const uint64_t ANIM_fx1[] PROGMEM = {
   0x1800000000000000,
   0x0000000000000000
 };
-int ANIM_fx1_length = sizeof(ANIM_fx1)/8;
+int ANIM_fx1_len = sizeof(ANIM_fx1)/8;
+
+const uint64_t ANIM_fx2[] PROGMEM = {
+  0x8142241818244281,
+  0x4021121c38488402,
+  0x2010111e78880804,
+  0x1010101ff8080808,
+  0x080808f81f101010,
+  0x040888781e111020,
+  0x028448381c122140
+};
+int ANIM_fx2_len = sizeof(ANIM_fx2)/8;
 
 
 const uint64_t ANIM_FACE_lol[] PROGMEM = {
@@ -261,6 +272,7 @@ void runAnimation(const uint64_t *animArray, const int animLength, int cyclesCou
   }
 }
 
+// non blocking animation class
 class DotMatrixAnimation {
   bool isAnimating = false;
 
@@ -344,7 +356,7 @@ class DotMatrixAnimation {
 
 };
 
-DotMatrixAnimation animation_intro(ANIM_pulsating, ANIM_pulsating_length);
+DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 
 void sound_fx1_update() {
   if (doSound == true) {
@@ -807,13 +819,13 @@ void processPush(int buttonId) {
 
   case 3:
     // timed buttons game
-    runAnimation(ANIM_fx1, ANIM_fx1_length, 1, 50);
+    runAnimation(ANIM_fx1, ANIM_fx1_len, 1, 50);
     runAnimation(ANIM_FACE_sad, ANIM_FACE_sad_length);
     runAnimation(ANIM_FACE_lol, ANIM_FACE_lol_length);
-    runAnimation(ANIM_gun, ANIM_gun_length, 2);
-    runAnimation(ANIM_laser, ANIM_laser_length);
-    runAnimation(ANIM_lines, ANIM_lines_length);
-    runAnimation(ANIM_pulsating, ANIM_pulsating_length, 3);
+    runAnimation(ANIM_gun, ANIM_gun_len, 2);
+    runAnimation(ANIM_laser, ANIM_laser_len);
+    runAnimation(ANIM_lines, ANIM_lines_len);
+    runAnimation(ANIM_pulsating, ANIM_pulsating_len, 3);
   break;
 
   default:
