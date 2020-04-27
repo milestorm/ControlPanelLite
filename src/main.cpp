@@ -22,6 +22,9 @@ Contains four games:
 uses code for Simon says game from SparkFun Inventor's Kit: Example sketch 16
 */
 
+// helper for array size
+#define NUMITEMS(arg) ((unsigned int) (sizeof (arg) / sizeof (arg [0])))
+
 MaxMatrix dot_matrix(DOTMATRIX_DIN, DOTMATRIX_CS, DOTMATRIX_CLK, DOTMATRIX_DISPLAY_COUNT);
 
 OneButton myButtons[] = {OneButton(BUTTON_RED, true), OneButton(BUTTON_GREEN, true), OneButton(BUTTON_BLUE, true), OneButton(BUTTON_YELLOW, true)};
@@ -357,6 +360,162 @@ class DotMatrixAnimation {
 };
 
 DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
+
+/* zvuky udelat neco na zpusob rtttl
+zapsany prikazy v array
+
+tone: frequency, tonelength (ms)
+  T:440;1000
+pause: pauselength
+  P:500
+sweep: startfreq, stopfreq, step, tonelength
+  S:1000;2000;10;5
+random: minfreq maxfreq mintonelength maxtonelength
+  R:300;500;2;8
+
+example
+  {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5"}
+
+
+*/
+
+class ToneSfx {
+  int pin;
+  char **inputArray;
+  int inputArrayLength;
+  int arrayIndex = 0;
+
+  bool playing = false;
+  bool infinitePlayback = false;
+
+  bool readCommand = false;
+  int commandType = -1;
+  char *readValue;
+
+  int num;
+  int frequency;
+  int duration;
+
+  VirtualDelay soundDelay;
+
+  public:
+  ToneSfx(int _pin, char **_inputArray, int _inputArrayLength) {
+    inputArray = _inputArray;
+    pin = _pin;
+    //inputArrayLength = sizeof(inputArray) / sizeof(inputArray[0]);
+    inputArrayLength = _inputArrayLength;
+  }
+
+  bool isPlaying() {
+    return playing;
+  }
+
+  void setInfinite(bool value = true) {
+    infinitePlayback = value;
+  }
+
+  void start() {
+    playing = true;
+  }
+
+  void stop() {
+    playing = false;
+  }
+
+  void tick() {
+    if (playing) {
+      // reads value from array once
+      if (!readCommand) {
+        readValue = inputArray[arrayIndex];
+        readCommand = true;
+        Serial.print("^ READING COMMAND: ");
+        Serial.println(readValue);
+      }
+
+      // Prepares values for effects
+      // TONE
+      if (*readValue == 'T') {
+        Serial.println("TONE");
+
+        readValue++; readValue++; // skip T:
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        frequency = num;
+        readValue++; // skip semicolon
+
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        duration = num;
+        commandType = 0;
+      }
+      // PAUSE
+      else if (*readValue == 'P') {
+        Serial.println("PAUSE");
+        readCommand = false;
+      }
+      // SWEEP
+      else if (*readValue == 'S') {
+        Serial.println("SWEEP");
+        readCommand = false;
+      }
+      // RANDOM
+      else if (*readValue == 'R') {
+        Serial.println("RANDOM");
+        readCommand = false;
+      }
+
+      // tone generation
+      switch (commandType) {
+      case 0: // TONE
+          tone(pin, frequency, duration);
+          soundDelay.start(duration);
+          if(soundDelay.elapsed()) {
+            readCommand = false;
+            commandType = -1;
+          }
+        break;
+
+      case 1: // PAUSE
+        break;
+
+      case 2: // SWEEP
+        break;
+
+      case 3: // RANDOM
+        break;
+
+      default:
+        break;
+      }
+
+      if (!readCommand) {
+        Serial.println(">> NEXT COMMAND");
+        if (arrayIndex < inputArrayLength - 1) {
+          arrayIndex++;
+        } else {
+          if (infinitePlayback) {
+            arrayIndex = 0;
+          } else {
+            arrayIndex = 0;
+            playing = false;
+          }
+        }
+      }
+
+    }
+  }
+
+};
+
+char *examplestring[] = {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5"};
+
+
+ToneSfx tonn(BUZZER, examplestring, sizeof(examplestring) / sizeof(examplestring[0]));
+
 
 void sound_fx1_update() {
   if (doSound == true) {
@@ -767,7 +926,7 @@ void processPush(int buttonId) {
 
     case 2:
       // sound board
-      animation_intro.stop();
+      //animation_intro.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_soundboard, 100);
       break;
@@ -815,6 +974,7 @@ void processPush(int buttonId) {
 
   case 2:
     // sound board
+    tonn.start();
     break;
 
   case 3:
@@ -936,6 +1096,7 @@ void loop() {
     }
 
     animation_intro.tick();
+    tonn.tick();
     break;
   }
 }
