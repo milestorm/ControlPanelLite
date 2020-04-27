@@ -364,14 +364,16 @@ DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 /* zvuky udelat neco na zpusob rtttl
 zapsany prikazy v array
 
-tone: frequency, tonelength (ms)
+tone: frequency, toneDuration(ms)
   T:440;1000
-pause: pauselength
+pause: pauseDuration (ms)
   P:500
-sweep: startfreq, stopfreq, step, tonelength
+sweep: startfreq, stopfreq, step, toneDuration (ms)
   S:1000;2000;10;5
-random: minfreq maxfreq mintonelength maxtonelength
+random: minfreq, maxfreq, mintoneDuration, maxtoneDuration (ms)
   R:300;500;2;8
+noise: minfreq, maxfreq, mintoneDuration, maxtoneDuration, effectDuration (ms)
+  N:300;500;2;8;500
 
 example
   {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5"}
@@ -381,7 +383,8 @@ example
 
 class ToneSfx {
   int pin;
-  char **inputArray;
+  int seedPin = A0;
+  const char **inputArray;
   int inputArrayLength;
   int arrayIndex = 0;
 
@@ -390,7 +393,7 @@ class ToneSfx {
 
   bool readCommand = false;
   int commandType = -1;
-  char *readValue;
+  const char *readValue;
 
   int num;
   int frequency;
@@ -398,14 +401,72 @@ class ToneSfx {
   int freqStart;
   int freqEnd;
   int step;
+  int minDuration;
+  int maxDuration;
+  int noiseDuration;
 
-  VirtualDelay soundDelay;
+  VirtualDelay soundDelay, soundDelay2;
+
+  private:
+
+  // Seed generator from ADC pin (pins A6 and A7 on NANO)
+  uint32_t get_seed(int pin) {
+
+      uint16_t aread;
+      union {
+          uint32_t as_uint32_t;
+          uint8_t  as_uint8_t[4];
+      } seed;
+      uint8_t i, t;
+
+          /* "aread" shifts 3 bits each time and the shuffle
+          * moves bytes around in chunks of 8.  To ensure
+          * every bit is combined with every other bit,
+          * loop 3 x 8 = 24 times.
+          */
+      for (i = 0; i < 24; i++) {
+          /* Shift three bits of A2D "noise" into aread. */
+          aread <<= 3;
+          aread |= analogRead(pin) & 0x7;
+
+          /* Now shuffle the bytes of the seed
+          * and xor our new set of bits onto the
+          * the seed.
+          */
+          t = seed.as_uint8_t[0];
+          seed.as_uint8_t[0] = seed.as_uint8_t[3];
+          seed.as_uint8_t[3] = seed.as_uint8_t[1];
+          seed.as_uint8_t[1] = seed.as_uint8_t[2];
+          seed.as_uint8_t[2] = t;
+
+          seed.as_uint32_t ^= aread;
+      }
+
+      return(seed.as_uint32_t);
+  }
+
+
+  int randomGenerator(int min, int max) { // range : [min, max)
+    static bool rndGenFirst = true;
+    if (rndGenFirst) {
+        uint32_t seed = get_seed(seedPin);
+
+        if (DEBUG) {
+          Serial.print("USING SEED: ");
+          Serial.println(seed);
+        }
+
+        srandom(seed); // seeding for the first time only!
+        rndGenFirst = false;
+    }
+    return min + random() % (( max + 1 ) - min);
+  }
 
   public:
-  ToneSfx(int _pin, char **_inputArray, int _inputArrayLength) {
+  ToneSfx(int _pin, const char **_inputArray, int _inputArrayLength) {
     inputArray = _inputArray;
     pin = _pin;
-    //inputArrayLength = sizeof(inputArray) / sizeof(inputArray[0]);
+    //inputArrayLength = sizeof(_inputArray) / sizeof(_inputArray[0]);
     inputArrayLength = _inputArrayLength;
   }
 
@@ -417,12 +478,17 @@ class ToneSfx {
     infinitePlayback = value;
   }
 
+  void setSeedPin(int pin) {
+    seedPin = pin;
+  }
+
   void start() {
     playing = true;
     // here maybe reset the playback with each start?
   }
 
   void stop() {
+    noTone(pin);
     playing = false;
   }
 
@@ -505,14 +571,70 @@ class ToneSfx {
         frequency = freqStart;
         commandType = 2;
       }
-      // ***** RANDOM *****
-      else if (*readValue == 'R') {
-        readCommand = false;
+      // ***** RANDOM or NOISE *****
+      else if (*readValue == 'R' || *readValue == 'N' ) {
+        bool isNoise = false;
+        if (*readValue == 'N') {
+          isNoise = true;
+        }
+
+        readValue++; readValue++; // skip R:
+        // read freqStart
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        freqStart = num;
+        readValue++; // skip semicolon
+
+        // read freqEnd
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        freqEnd = num;
+        readValue++; // skip semicolon
+
+        // read minDuration
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        minDuration = num;
+        readValue++; // skip semicolon
+
+        // read maxDuration
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        maxDuration = num;
+
+        if(!isNoise) { // RANDOM
+          frequency = randomGenerator(freqStart, freqEnd);
+          duration = randomGenerator(minDuration, maxDuration);
+          commandType = 0;
+        }
+        else { // NOISE
+          readValue++; // skip semicolon
+
+          // read maxDuration
+          num = 0;
+          while(isdigit(*readValue)) {
+            num = (num * 10) + (*readValue++ - '0');
+          }
+          noiseDuration = num;
+
+          frequency = randomGenerator(freqStart, freqEnd);
+          duration = randomGenerator(minDuration, maxDuration);
+          commandType = 3;
+        }
+
       }
 
       // tone generation
       switch (commandType) {
-      case 0: // ***** TONE *****
+      case 0: // ***** TONE, RANDOM TONE *****
           tone(pin, frequency, duration);
           soundDelay.start(duration);
           if(soundDelay.elapsed()) {
@@ -531,7 +653,6 @@ class ToneSfx {
         break;
 
       case 2: // ***** SWEEP *****
-        // jestli up nebo down musim zjistit
           tone(pin, frequency, duration);
           soundDelay.start(duration);
           if(soundDelay.elapsed()) {
@@ -547,11 +668,22 @@ class ToneSfx {
               commandType = -1;
             }
           }
-
-
         break;
 
-      case 3: // ***** RANDOM *****
+      case 3: // ***** NOISE *****
+          tone(pin, frequency, duration);
+          soundDelay.start(duration);
+          soundDelay2.start(noiseDuration);
+          if(soundDelay.elapsed()) {
+
+            frequency = randomGenerator(freqStart, freqEnd);
+            duration = randomGenerator(minDuration, maxDuration);
+
+            if (soundDelay2.elapsed()) {
+              readCommand = false;
+              commandType = -1;
+            }
+          }
         break;
 
       default:
@@ -577,7 +709,7 @@ class ToneSfx {
 
 };
 
-char *examplestring[] = {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5"};
+const char *examplestring[] = {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5", "N:200;300;5;20;700"};
 
 
 ToneSfx tonn(BUZZER, examplestring, sizeof(examplestring) / sizeof(examplestring[0]));
@@ -799,7 +931,7 @@ void toner(byte which, int buzz_length_ms)
 // Plays the current contents of the game moves
 void playMoves(void)
 {
-  for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++) 
+  for (byte currentMove = 0 ; currentMove < gameRound ; currentMove++)
   {
     toner(gameBoard[currentMove], 150);
 
@@ -1098,9 +1230,9 @@ void setup() {
 
   animation_intro.setInfinite();
   animation_intro.start();
-  tone(BUZZER, NOTE_E5, 100);
-  delay(100);
-  tone(BUZZER, NOTE_E6, 400);
+  //tone(BUZZER, NOTE_E5, 100);
+  //delay(100);
+  //tone(BUZZER, NOTE_E6, 400);
   flashAllLeds();
 
 	for (int i = 0; i < 4; i++){
@@ -1164,7 +1296,7 @@ void loop() {
     }
 
     animation_intro.tick();
-    tonn.tick();
+    //tonn.tick();
     break;
   }
 }
