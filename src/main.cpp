@@ -395,6 +395,9 @@ class ToneSfx {
   int num;
   int frequency;
   int duration;
+  int freqStart;
+  int freqEnd;
+  int step;
 
   VirtualDelay soundDelay;
 
@@ -416,6 +419,7 @@ class ToneSfx {
 
   void start() {
     playing = true;
+    // here maybe reset the playback with each start?
   }
 
   void stop() {
@@ -433,11 +437,10 @@ class ToneSfx {
       }
 
       // Prepares values for effects
-      // TONE
+      // ***** TONE *****
       if (*readValue == 'T') {
-        Serial.println("TONE");
-
         readValue++; readValue++; // skip T:
+        // read frequency
         num = 0;
         while(isdigit(*readValue)) {
           num = (num * 10) + (*readValue++ - '0');
@@ -445,32 +448,71 @@ class ToneSfx {
         frequency = num;
         readValue++; // skip semicolon
 
+        // read duration
         num = 0;
         while(isdigit(*readValue)) {
           num = (num * 10) + (*readValue++ - '0');
         }
         duration = num;
+
         commandType = 0;
       }
-      // PAUSE
+      // ***** PAUSE *****
       else if (*readValue == 'P') {
-        Serial.println("PAUSE");
-        readCommand = false;
+        readValue++; readValue++; // skip P:
+        // read pause duration
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        duration = num;
+        commandType = 1;
       }
-      // SWEEP
+      // ***** SWEEP *****
       else if (*readValue == 'S') {
-        Serial.println("SWEEP");
-        readCommand = false;
+        readValue++; readValue++; // skip S:
+        // read freqStart
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        freqStart = num;
+        readValue++; // skip semicolon
+
+        // read freqEnd
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        freqEnd = num;
+        readValue++; // skip semicolon
+
+        // read step
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        step = num;
+        readValue++; // skip semicolon
+
+        // read duration
+        num = 0;
+        while(isdigit(*readValue)) {
+          num = (num * 10) + (*readValue++ - '0');
+        }
+        duration = num;
+
+        frequency = freqStart;
+        commandType = 2;
       }
-      // RANDOM
+      // ***** RANDOM *****
       else if (*readValue == 'R') {
-        Serial.println("RANDOM");
         readCommand = false;
       }
 
       // tone generation
       switch (commandType) {
-      case 0: // TONE
+      case 0: // ***** TONE *****
           tone(pin, frequency, duration);
           soundDelay.start(duration);
           if(soundDelay.elapsed()) {
@@ -479,13 +521,37 @@ class ToneSfx {
           }
         break;
 
-      case 1: // PAUSE
+      case 1: // ***** PAUSE *****
+          noTone(pin);
+          soundDelay.start(duration);
+          if(soundDelay.elapsed()) {
+            readCommand = false;
+            commandType = -1;
+          }
         break;
 
-      case 2: // SWEEP
+      case 2: // ***** SWEEP *****
+        // jestli up nebo down musim zjistit
+          tone(pin, frequency, duration);
+          soundDelay.start(duration);
+          if(soundDelay.elapsed()) {
+
+            if (freqStart < freqEnd) { // lower to higher sweep
+              frequency += step;
+            } else { // higher to lower sweep
+              frequency -= step;
+            }
+
+            if (frequency == freqEnd) {
+              readCommand = false;
+              commandType = -1;
+            }
+          }
+
+
         break;
 
-      case 3: // RANDOM
+      case 3: // ***** RANDOM *****
         break;
 
       default:
@@ -517,8 +583,7 @@ char *examplestring[] = {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100"
 ToneSfx tonn(BUZZER, examplestring, sizeof(examplestring) / sizeof(examplestring[0]));
 
 
-void sound_fx1_update() {
-  if (doSound == true) {
+void sound_fx1() {
     tone(BUZZER, 800, 100);
     delay(150);
     tone(BUZZER, 1000, 100);
@@ -529,7 +594,6 @@ void sound_fx1_update() {
       tone(BUZZER, i, 5);
       delay(5);
     }
-  }
 }
 
 // --------------------------------------------------------------------------------
@@ -974,7 +1038,11 @@ void processPush(int buttonId) {
 
   case 2:
     // sound board
-    tonn.start();
+    if (buttonId == 1) {
+      sound_fx1();
+    } else {
+      tonn.start();
+    }
     break;
 
   case 3:
