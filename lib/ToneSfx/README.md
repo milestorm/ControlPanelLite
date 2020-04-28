@@ -33,6 +33,8 @@ __`T:frequency,duration`__
 __Example__
 `T:440:500` - plays tone of 44O Hz for 500 ms
 
+---
+
 #### Pause
 Pauses playback
 
@@ -41,6 +43,8 @@ __`P:duration`__
 
 __Example__
 `P:1000` - pauses playback for 1000 ms
+
+---
 
 #### Sweep
 Does sweep effect from startFrequency to endFrequency with step for a time
@@ -54,6 +58,8 @@ __`S:startFrequency,endFrequency,step,duration`__
 __Example__
 `S:2200,1000,10,5` - plays up-down sweep sound like falling missile
 
+---
+
 #### Random
 Plays a single random tone from interval
 
@@ -63,6 +69,8 @@ __`R:minFrequency,maxFrequency,minDuration,maxDuration`__
 
 __Example__
 `R:1000,2000,100,500` - plays random tone from 1000 to 2000 Hz, durating 100 to 500 ms
+
+---
 
 #### Noise
 Plays series of random tones for period of time. If maxDuration and minDuration are short enough, it produces some kind of noise
@@ -74,6 +82,8 @@ __`N:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
 
 __Example__
 `N:100,200,5,15,1000` - plays low noise for 1000 ms
+
+---
 
 
 ### Constants
