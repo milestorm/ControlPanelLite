@@ -5,18 +5,19 @@ This is an Arduino Library, which uses tone to create chain of non-blocking soun
 
 ## Library Usage
 ### Instantiation/Creation
-`ToneSfx tone1(pin, myToneCommands, myToneCommandsLength);`
+`ToneSfx tone1(pin);`
+
 Assigns pin for playing tone, tone commands chain array, and computes size of chain array
 
-* `pin` - pin for playing tone
-* `myToneCommands` - Array of string with commands
-* `myToneCommandsLength` - Number of commands (elements) in array. You can use `sizeof(myToneCommands) / sizeof(myToneCommands[0])`.
+* `pin` - pin for connecting speaker
 
 ### Methods
 * `isPlaying()` - Returns true if tone is playing, false if not.
 * `setInfinite(value)` - Sets if playback will be looped indefinitely until `stop()` is called
 * `setSeedPin(pin)` - You can modify the analog pin for creating random seed. Default pin for random seed is set to `A0`.
-* `start()` - Non-blocking function. Starts the sound chain, and then after chain is finished, stop automatically.
+* `play(myToneCommands, myToneCommandsLength)` - Non-blocking function. Starts the sound chain, and then after chain is finished, stop automatically.
+    * `myToneCommands` - Array of string with commands
+    * `myToneCommandsLength` - Number of commands (elements) in array. You can use `sizeof(myToneCommands) / sizeof(myToneCommands[0])`.
 * `stop()` - Stop playing tone.
 * `tick()` - Watcher. Must be placed in `loop()` function.
 
