@@ -161,6 +161,7 @@ class DotMatrixAnimation {
 
   void start(int _cyclesCount = 1) {
     cyclesCount = _cyclesCount;
+    cyclesIndex = 0;
     isAnimating = true;
   }
 
@@ -186,6 +187,7 @@ class DotMatrixAnimation {
           } else {
             if (cyclesIndex == cyclesCount - 1) {
               isAnimating = false;
+              dot_matrix.clear();
             }
             animIndex = 0;
             cyclesIndex++;
@@ -202,11 +204,16 @@ class DotMatrixAnimation {
 };
 
 DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
+DotMatrixAnimation animation_gun(ANIM_gun, ANIM_gun_len, 30);
 
 
 
 const char *sfxBombCmd[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500"};
 const char *sfxSirenCmd[] = {"S:880,1650,50,10", "S:1650,880,50,10"};
+const char *sfxGunCmd[] = {"N:100,200,5,15,200", "S:2200,900,50,12"};
+// wolf3d sound, lol
+const char *sfxBlastCmd[] = {"N:400,500,5,15,50", "N:300,400,5,15,75", "N:200,300,5,15,100", "N:100,200,5,15,125"};
+
 ToneSfx toneSfx(BUZZER);
 
 
@@ -581,7 +588,7 @@ void processPush(int buttonId) {
 
     case 2:
       // sound board
-      //animation_intro.stop();
+      animation_intro.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_soundboard, text_speed);
       break;
@@ -629,12 +636,22 @@ void processPush(int buttonId) {
 
   case 2:
     // sound board
-    if (buttonId == 1) {
+    if (buttonId == 0) {
       toneSfx.setInfinite(true);
       toneSfx.play(sfxSirenCmd, sizeof(sfxSirenCmd) / sizeof(sfxSirenCmd[0]));
-    } else {
+    }
+    if (buttonId == 1) {
+      animation_gun.start();
+      toneSfx.setInfinite(false);
+      toneSfx.play(sfxGunCmd, sizeof(sfxGunCmd) / sizeof(sfxGunCmd[0]));
+    }
+    if (buttonId == 2) {
       toneSfx.setInfinite(false);
       toneSfx.play(sfxBombCmd, sizeof(sfxBombCmd) / sizeof(sfxBombCmd[0]));
+    }
+    if (buttonId == 3) {
+      toneSfx.setInfinite(false);
+      toneSfx.play(sfxBlastCmd, sizeof(sfxBlastCmd) / sizeof(sfxBlastCmd[0]));
     }
     break;
 
@@ -756,6 +773,7 @@ void loop() {
       myLeds[i].tick();
     }
 
+    animation_gun.tick();
     animation_intro.tick();
     toneSfx.tick();
     break;
