@@ -207,7 +207,7 @@ DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 
 const char *sfxBombCmd[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500"};
 const char *sfxSirenCmd[] = {"S:880,1650,50,10", "S:1650,880,50,10"};
-ToneSfx sfxBomb(BUZZER);
+ToneSfx toneSfx(BUZZER);
 
 
 // --------------------------------------------------------------------------------
@@ -630,11 +630,11 @@ void processPush(int buttonId) {
   case 2:
     // sound board
     if (buttonId == 1) {
-      sfxBomb.setInfinite(true);
-      sfxBomb.play(sfxSirenCmd, sizeof(sfxSirenCmd) / sizeof(sfxSirenCmd[0]));
+      toneSfx.setInfinite(true);
+      toneSfx.play(sfxSirenCmd, sizeof(sfxSirenCmd) / sizeof(sfxSirenCmd[0]));
     } else {
-      sfxBomb.setInfinite(false);
-      sfxBomb.play(sfxBombCmd, sizeof(sfxBombCmd) / sizeof(sfxBombCmd[0]));
+      toneSfx.setInfinite(false);
+      toneSfx.play(sfxBombCmd, sizeof(sfxBombCmd) / sizeof(sfxBombCmd[0]));
     }
     break;
 
@@ -757,7 +757,7 @@ void loop() {
     }
 
     animation_intro.tick();
-    sfxBomb.tick();
+    toneSfx.tick();
     break;
   }
 }
