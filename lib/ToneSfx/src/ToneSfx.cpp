@@ -1,3 +1,22 @@
+/*
+ToneSfx library
+===============
+version 1.0 (Apr 2020)
+copyright (c) 2020 MileStorm
+https://github.com/milestorm
+
+This program is free software: you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free Software
+Foundation, either version 3 of the License, or (at your option) any later
+version. This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at
+http://www.gnu.org/licenses .
+
+This libraryvuses VirtualDelay library
+from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
+*/
+
 #include "ToneSfx.h"
 
 ToneSfx::ToneSfx(int _pin, const char **_inputArray, int _inputArrayLength) {
@@ -7,11 +26,64 @@ ToneSfx::ToneSfx(int _pin, const char **_inputArray, int _inputArrayLength) {
     inputArrayLength = _inputArrayLength;
 }
 
+// Seed generator from ADC pin (pins A6 and A7 on NANO)
+uint32_t ToneSfx::get_seed(int pin) {
+
+    uint16_t aread;
+    union {
+        uint32_t as_uint32_t;
+        uint8_t  as_uint8_t[4];
+    } seed;
+    uint8_t i, t;
+
+        /* "aread" shifts 3 bits each time and the shuffle
+        * moves bytes around in chunks of 8.  To ensure
+        * every bit is combined with every other bit,
+        * loop 3 x 8 = 24 times.
+        */
+    for (i = 0; i < 24; i++) {
+        /* Shift three bits of A2D "noise" into aread. */
+        aread <<= 3;
+        aread |= analogRead(pin) & 0x7;
+
+        /* Now shuffle the bytes of the seed
+        * and xor our new set of bits onto the
+        * the seed.
+        */
+        t = seed.as_uint8_t[0];
+        seed.as_uint8_t[0] = seed.as_uint8_t[3];
+        seed.as_uint8_t[3] = seed.as_uint8_t[1];
+        seed.as_uint8_t[1] = seed.as_uint8_t[2];
+        seed.as_uint8_t[2] = t;
+
+        seed.as_uint32_t ^= aread;
+    }
+
+    return(seed.as_uint32_t);
+}
+
+
+int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
+    static bool rndGenFirst = true;
+    if (rndGenFirst) {
+        uint32_t seed = get_seed(seedPin);
+
+        if (DEBUG) {
+            Serial.print("USING SEED: ");
+            Serial.println(seed);
+        }
+
+        srandom(seed); // seeding for the first time only!
+        rndGenFirst = false;
+    }
+    return min + random() % (( max + 1 ) - min);
+}
+
 bool ToneSfx::isPlaying() {
     return playing;
 }
 
-void ToneSfx::setInfinite(bool value = true) {
+void ToneSfx::setInfinite(bool value) {
     infinitePlayback = value;
 }
 
@@ -35,8 +107,10 @@ void ToneSfx::tick() {
         if (!readCommand) {
             readValue = inputArray[arrayIndex];
             readCommand = true;
-            Serial.print("^ READING COMMAND: ");
-            Serial.println(readValue);
+            if (DEBUG) {
+                Serial.print("^ READING COMMAND: ");
+                Serial.println(readValue);
+            }
         }
 
         // Prepares values for effects
@@ -49,7 +123,7 @@ void ToneSfx::tick() {
                 num = (num * 10) + (*readValue++ - '0');
             }
             frequency = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read duration
             num = 0;
@@ -80,7 +154,7 @@ void ToneSfx::tick() {
             num = (num * 10) + (*readValue++ - '0');
             }
             freqStart = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read freqEnd
             num = 0;
@@ -88,7 +162,7 @@ void ToneSfx::tick() {
             num = (num * 10) + (*readValue++ - '0');
             }
             freqEnd = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read step
             num = 0;
@@ -96,7 +170,7 @@ void ToneSfx::tick() {
             num = (num * 10) + (*readValue++ - '0');
             }
             step = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read duration
             num = 0;
@@ -122,7 +196,7 @@ void ToneSfx::tick() {
                 num = (num * 10) + (*readValue++ - '0');
             }
             freqStart = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read freqEnd
             num = 0;
@@ -130,7 +204,7 @@ void ToneSfx::tick() {
                 num = (num * 10) + (*readValue++ - '0');
             }
             freqEnd = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read minDuration
             num = 0;
@@ -138,7 +212,7 @@ void ToneSfx::tick() {
                 num = (num * 10) + (*readValue++ - '0');
             }
             minDuration = num;
-            readValue++; // skip semicolon
+            readValue++; // skip colon
 
             // read maxDuration
             num = 0;
@@ -148,12 +222,12 @@ void ToneSfx::tick() {
             maxDuration = num;
 
             if(!isNoise) { // RANDOM
-                frequency = randomGenerator(freqStart, freqEnd);
-                duration = randomGenerator(minDuration, maxDuration);
+                frequency = this->randomGenerator(freqStart, freqEnd);
+                duration = this->randomGenerator(minDuration, maxDuration);
                 commandType = 0;
             }
             else { // NOISE
-                readValue++; // skip semicolon
+                readValue++; // skip colon
 
                 // read maxDuration
                 num = 0;
@@ -162,8 +236,8 @@ void ToneSfx::tick() {
                 }
                 noiseDuration = num;
 
-                frequency = randomGenerator(freqStart, freqEnd);
-                duration = randomGenerator(minDuration, maxDuration);
+                frequency = this->randomGenerator(freqStart, freqEnd);
+                duration = this->randomGenerator(minDuration, maxDuration);
                 commandType = 3;
             }
 
@@ -213,8 +287,8 @@ void ToneSfx::tick() {
             soundDelay2.start(noiseDuration);
             if(soundDelay.elapsed()) {
 
-                frequency = randomGenerator(freqStart, freqEnd);
-                duration = randomGenerator(minDuration, maxDuration);
+                frequency = this->randomGenerator(freqStart, freqEnd);
+                duration = this->randomGenerator(minDuration, maxDuration);
 
                 if (soundDelay2.elapsed()) {
                     readCommand = false;
@@ -228,7 +302,9 @@ void ToneSfx::tick() {
         }
 
         if (!readCommand) {
-            Serial.println(">> NEXT COMMAND");
+            if (DEBUG) {
+                Serial.println(">> NEXT COMMAND");
+            }
             if (arrayIndex < inputArrayLength - 1) {
                 arrayIndex++;
             } else {
