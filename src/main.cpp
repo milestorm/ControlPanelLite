@@ -9,6 +9,7 @@
 #include <avr/pgmspace.h>
 #include <avdweb_VirtualDelay.h>
 #include <ToneSfx.h>
+#include <animations.h>
 
 /*
 Control Panel Lite by MileStorm
@@ -30,8 +31,6 @@ MaxMatrix dot_matrix(DOTMATRIX_DIN, DOTMATRIX_CS, DOTMATRIX_CLK, DOTMATRIX_DISPL
 
 OneButton myButtons[] = {OneButton(BUTTON_RED, true), OneButton(BUTTON_GREEN, true), OneButton(BUTTON_BLUE, true), OneButton(BUTTON_YELLOW, true)};
 Flasher myLeds[] = {Flasher(LED_RED, 300, 300), Flasher(LED_GREEN, 300, 300), Flasher(LED_BLUE, 300, 300), Flasher(LED_YELLOW, 300, 300)};
-
-VirtualDelay delay1, delay2, delay3, delay4, delay5, delay6;
 
 bool doSound = false;
 
@@ -60,191 +59,10 @@ byte numbers_score[] = {
   B01111100, B01010100, B01111100, B00000000, // 8 = 32
   B01011100, B01010100, B01111100, B00000000  // 9 = 36
 };
-// animation definitions
-const uint64_t ANIM_lines[] PROGMEM = {
-  0x1818181818181818,
-  0x0c0c181818183030,
-  0x060c0c1818303060,
-  0x03060c18183060c0,
-  0x0001071e78e08000,
-  0x0000033ffcc00000,
-  0x000000ffff000000,
-  0x0000c0fc3f030000,
-  0x0080e0781e070100,
-  0x80c060381c060301,
-  0x60303018180c0c06,
-  0x3030181818180c0c
-};
-int ANIM_lines_len = sizeof(ANIM_lines)/8;
-
-const uint64_t ANIM_bomb[] PROGMEM = {
-  0x0000000000000018,
-  0x000000000000183c,
-  0x0000000000183c3c,
-  0x00000000183c3c3c,
-  0x000000183c3c3c3c,
-  0x0000183c3c3c3c00,
-  0x00183c3c3c3c0000,
-  0x183c3c3c3c000000,
-  0x3c3c3c3c00000000,
-  0x3c7e341c00000000,
-  0x3c5ae60001000000,
-  0x3c5af62881000000,
-  0x1818b166118a4000,
-  0x0000099421025024,
-  0x000000000050810a,
-  0x0000000000000000
-};
-int ANIM_bomb_len = sizeof(ANIM_bomb)/8;
-
-const uint64_t ANIM_beacon[] PROGMEM = {
-  0x7e7e7e7e3c180000,
-  0x7c7c7c7c385a8124,
-  0x7a7a7a7a345a8124,
-  0x7676767634992442,
-  0x6e6e6e6e2c992442,
-  0x5e5e5e5e2c180000,
-  0x3e3e3e3e1c180000
-};
-int ANIM_beacon_len = sizeof(ANIM_beacon)/8;
-
-const uint64_t ANIM_gun[] PROGMEM = {
-  0x00060e167e7d0000,
-  0x00060e167e7d0000,
-  0x00060e167e7d0000,
-  0x00060e167e7e0000,
-  0x000103051f1f0000,
-  0x0000000107070000,
-  0x0000000001010000,
-  0x0000000203030000,
-  0x0000040205030400,
-  0x0008040009010408,
-  0x1008000011010000,
-  0x0000000021010000,
-  0x0000000041010000,
-  0x0000000081010000,
-  0x0000000001010000,
-  0x0000000107070000,
-  0x000103051f1f0000
-};
-int ANIM_gun_len = sizeof(ANIM_gun)/8;
-
-const uint64_t ANIM_laser[] PROGMEM = {
-  0x0102028241404080,
-  0x01030283c140c080,
-  0x01030383c1c0c080,
-  0x0102078241e04080,
-  0x01020f8241f04080,
-  0x01021e8241784080,
-  0x01023a82415c4080,
-  0x01027282414e4080,
-  0x0102e28241474080,
-  0x0102c28241434080,
-  0x0102828241414080
-};
-int ANIM_laser_len = sizeof(ANIM_laser)/8;
-
-const uint64_t ANIM_pulsating[] PROGMEM = {
-  0x8100000000000081,
-  0x8142000000004281,
-  0x0042240000244200,
-  0x0000241818240000,
-  0x0000001818000000,
-  0x0000183c3c180000,
-  0x0018244242241800,
-  0x1842008181004218
-};
-int ANIM_pulsating_len = sizeof(ANIM_pulsating)/8;
-
-const uint64_t ANIM_fx1[] PROGMEM = {
-  0x0101010101010101,
-  0x0103030303030301,
-  0x0103070707070301,
-  0x0103070f0f070301,
-  0x0002061e1e060200,
-  0x0000243c3c240000,
-  0x0040607878604000,
-  0x80c0e0f0f0e0c080,
-  0x80c0e0e0e0e0c080,
-  0x80c0c0c0c0c0c080,
-  0x8080808080808080,
-  0x4040808080808080,
-  0x0020204040408080,
-  0x0010102020404080,
-  0x0000081020204080,
-  0x0000040810204080,
-  0x0000000408304080,
-  0x0000000006186080,
-  0x00000000000638c0,
-  0x00000000000003fc,
-  0x00000000000000ff,
-  0x00000000000081ff,
-  0x000000000081c3ff,
-  0x0000000081c3e7ff,
-  0x00000081c3e7ff7e,
-  0x000081c3e7ff7e3c,
-  0x0081c3e7ff7e3c18,
-  0x81c3e7ff7e3c1800,
-  0xc3e7ff7e3c180000,
-  0xe7ff7e3c18000000,
-  0xff7e3c1800000000,
-  0x7e3c180000000000,
-  0x3c18000000000000,
-  0x1800000000000000,
-  0x0000000000000000
-};
-int ANIM_fx1_len = sizeof(ANIM_fx1)/8;
-
-const uint64_t ANIM_fx2[] PROGMEM = {
-  0x8142241818244281,
-  0x4021121c38488402,
-  0x2010111e78880804,
-  0x1010101ff8080808,
-  0x080808f81f101010,
-  0x040888781e111020,
-  0x028448381c122140
-};
-int ANIM_fx2_len = sizeof(ANIM_fx2)/8;
-
-
-const uint64_t ANIM_FACE_lol[] PROGMEM = {
-  0x00003c4200666600,
-  0x003c7e4200660000,
-  0x3c427e4200006600,
-  0x003c427e42006600,
-  0x3c427e4200660000,
-  0x003c427e42006600,
-  0x3c427e4200660000,
-  0x003c427e42006600,
-  0x3c427e4200006600,
-  0x3c427e4200666600,
-  0x003c7e4200666600
-};
-int ANIM_FACE_lol_length = sizeof(ANIM_FACE_lol)/8;
-
-const uint64_t ANIM_FACE_sad[] PROGMEM = {
-  0x00003c0000666600,
-  0x0018241800666600,
-  0x0018241800666600,
-  0x0018241800666600,
-  0x0018241800666600,
-  0x0018241800660000,
-  0x00423c0066000000,
-  0x00423c0066000000,
-  0x00423c0066000000,
-  0x00423c0066000000,
-  0x0000423c00660000,
-  0x00423c0066000000,
-  0x00423c0066000000,
-  0x00423c0066000000,
-  0x00423c0066000000
-};
-int ANIM_FACE_sad_length = sizeof(ANIM_FACE_sad)/8;
-
-
 
 // Scrolling text
 byte buffer[10];
+int text_speed = 50; // 100 for normal text speed
 char start_message_easybuttons[] =  " Easy Buttons   ";
 char start_message_timedbuttons[] =    " Timed Buttons   ";
 char start_message_simon[] =    " Simon says   ";
@@ -273,6 +91,29 @@ void runAnimation(const uint64_t *animArray, const int animLength, int cyclesCou
       displayImage(image);
       delay(frameDelay); // predelat na nonblocking delay
     }
+  }
+}
+
+// Put extracted character on Display
+void printCharWithShift(char c, int shift_speed){
+  if (c < 32) return;
+  c -= 32;
+  memcpy_P(buffer, CH + 7 * c, 7);
+  dot_matrix.writeSprite(DOTMATRIX_DISPLAY_COUNT * 8, 0, buffer);
+  dot_matrix.setColumn(DOTMATRIX_DISPLAY_COUNT * 8 + buffer[0], 0);
+
+  for (int i = 0; i < buffer[0] + 1; i++)
+  {
+    delay(shift_speed);
+    dot_matrix.shiftLeft(false, false);
+  }
+}
+
+// Extract characters from Scrolling text
+void printStringWithShift(char* s, int shift_speed){
+  while (*s != 0){
+    printCharWithShift(*s, shift_speed);
+    s++;
   }
 }
 
@@ -364,24 +205,9 @@ DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 
 
 
-const char *examplestring[] = {"T:800,100", "P:150", "T:1000,100", "P:150", "T:1200,100", "P:150", "S:2200,1000,10,5", "N:100,200,5,15,700"};
+const char *sfxBombCmd[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500"};
+ToneSfx sfxBomb(BUZZER, sfxBombCmd, sizeof(sfxBombCmd) / sizeof(sfxBombCmd[0]));
 
-
-ToneSfx tonn(BUZZER, examplestring, sizeof(examplestring) / sizeof(examplestring[0]));
-
-
-void sound_fx1() {
-    tone(BUZZER, 800, 100);
-    delay(150);
-    tone(BUZZER, 1000, 100);
-    delay(150);
-    tone(BUZZER, 1200, 100);
-    delay(150);
-    for (int i = 2200 - 1; i >= 1000; i=i-10){
-      tone(BUZZER, i, 5);
-      delay(5);
-    }
-}
 
 // --------------------------------------------------------------------------------
 
@@ -430,29 +256,6 @@ int turnOnRandomLed() {
 // Game state variables
 byte gameBoard[32]; //Contains the combination of buttons as we advance
 byte gameRound = 0; //Counts the number of succesful rounds the player has made it through
-
-// Put extracted character on Display
-void printCharWithShift(char c, int shift_speed){
-  if (c < 32) return;
-  c -= 32;
-  memcpy_P(buffer, CH + 7 * c, 7);
-  dot_matrix.writeSprite(DOTMATRIX_DISPLAY_COUNT * 8, 0, buffer);
-  dot_matrix.setColumn(DOTMATRIX_DISPLAY_COUNT * 8 + buffer[0], 0);
-
-  for (int i = 0; i < buffer[0] + 1; i++)
-  {
-    delay(shift_speed);
-    dot_matrix.shiftLeft(false, false);
-  }
-}
-
-// Extract characters from Scrolling text
-void printStringWithShift(char* s, int shift_speed){
-  while (*s != 0){
-    printCharWithShift(*s, shift_speed);
-    s++;
-  }
-}
 
 void writeScore(int scoreInput, bool scrollable = true) {
   byte finalSprite[10];
@@ -698,7 +501,7 @@ void play_winner(void)
 
 void play_intro(void)
 {
-  printStringWithShift(start_message_simon, 100);  // Send scrolling Text
+  printStringWithShift(start_message_simon, text_speed);  // Send scrolling Text
 
   play_winner();
 }
@@ -763,7 +566,7 @@ void processPush(int buttonId) {
       // easy buttons game
       animation_intro.stop();
       turnOffAllLeds();
-      printStringWithShift(start_message_easybuttons, 100);
+      printStringWithShift(start_message_easybuttons, text_speed);
       writeScore(buttonGameScore, false);
       activeLed = turnOnRandomLed();
       break;
@@ -779,14 +582,14 @@ void processPush(int buttonId) {
       // sound board
       //animation_intro.stop();
       turnOffAllLeds();
-      printStringWithShift(start_message_soundboard, 100);
+      printStringWithShift(start_message_soundboard, text_speed);
       break;
 
     case 3:
       // timed buttons game
       animation_intro.stop();
       turnOffAllLeds();
-      printStringWithShift(start_message_timedbuttons, 100);
+      printStringWithShift(start_message_timedbuttons, text_speed);
       break;
 
     default:
@@ -826,9 +629,9 @@ void processPush(int buttonId) {
   case 2:
     // sound board
     if (buttonId == 1) {
-      sound_fx1();
+      
     } else {
-      tonn.start();
+      sfxBomb.start();
     }
     break;
 
@@ -951,7 +754,7 @@ void loop() {
     }
 
     animation_intro.tick();
-    tonn.tick();
+    sfxBomb.tick();
     break;
   }
 }
