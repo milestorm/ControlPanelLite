@@ -19,11 +19,8 @@ from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 
 #include "ToneSfx.h"
 
-ToneSfx::ToneSfx(int _pin, const char **_inputArray, int _inputArrayLength) {
-    inputArray = _inputArray;
+ToneSfx::ToneSfx(int _pin) {
     pin = _pin;
-    //inputArrayLength = sizeof(_inputArray) / sizeof(_inputArray[0]);
-    inputArrayLength = _inputArrayLength;
 }
 
 // Seed generator from ADC pin (pins A6 and A7 on NANO)
@@ -91,7 +88,9 @@ void ToneSfx::setSeedPin(int pin) {
     seedPin = pin;
   }
 
-void ToneSfx::start() {
+void ToneSfx::play(const char **_inputArray, int _inputArrayLength) {
+    inputArray = _inputArray;
+    inputArrayLength = _inputArrayLength;
     playing = true;
     // TODO: here maybe reset the playback with each start?
 }
@@ -268,16 +267,22 @@ void ToneSfx::tick() {
             soundDelay.start(duration);
             if(soundDelay.elapsed()) {
 
-                if (freqStart < freqEnd) { // lower to higher sweep
+                if (freqStart < freqEnd) { // hi-lo sweep
                     frequency += step;
-                } else { // higher to lower sweep
+
+                    if (frequency >= freqEnd) {
+                        readCommand = false;
+                        commandType = -1;
+                    }
+                } else { // lo-hi sweep
                     frequency -= step;
+
+                    if (frequency <= freqEnd) {
+                        readCommand = false;
+                        commandType = -1;
+                    }
                 }
 
-                if (frequency == freqEnd) {
-                    readCommand = false;
-                    commandType = -1;
-                }
             }
             break;
 

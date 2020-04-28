@@ -27,12 +27,12 @@ from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 
 class ToneSfx {
     public:
-        ToneSfx(int _pin, const char **_inputArray, int _inputArrayLength);
+        ToneSfx(int _pin);
         ToneSfx() {};
         bool isPlaying();
         void setInfinite(bool value = true);
         void setSeedPin(int pin);
-        void start();
+        void play(const char **_inputArray, int _inputArrayLength);
         void stop();
         void tick();
 

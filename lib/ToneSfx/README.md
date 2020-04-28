@@ -32,7 +32,7 @@ __`T:frequency,duration`__
 * duration: duration of tone
 
 __Example__
-`T:440:500` - plays tone of 44O Hz for 500 ms
+`T:440:500` - plays tone of 440 Hz for 500 ms
 
 ---
 
@@ -93,7 +93,7 @@ __Example__
 ### Example
 Play simple "missile" sound effect
 ```
-const char *myToneCommands[] = {"T:800,100", "P:150", "T:1000,100", "P:150", "T:1200,100", "P:150", "S:2200,1000,10,5", "N:100,200,5,15,700"};
+const char *myToneCommands[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500"};
 
 ToneSfx tone1(13, myTone1, sizeof(myToneCommands) / sizeof(myToneCommands[0]));
 
