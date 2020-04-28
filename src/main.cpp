@@ -362,25 +362,7 @@ class DotMatrixAnimation {
 
 DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 
-/* zvuky udelat neco na zpusob rtttl
-zapsany prikazy v array
 
-tone: frequency, toneDuration(ms)
-  T:440;1000
-pause: pauseDuration (ms)
-  P:500
-sweep: startfreq, stopfreq, step, toneDuration (ms)
-  S:1000;2000;10;5
-random: minfreq, maxfreq, mintoneDuration, maxtoneDuration (ms)
-  R:300;500;2;8
-noise: minfreq, maxfreq, mintoneDuration, maxtoneDuration, effectDuration (ms)
-  N:300;500;2;8;500
-
-example
-  {"T:800;100", "P:50", "T:1000;100", "P:50", "T:1200;100", "P:50", "S:2200;1000;10;5"}
-
-
-*/
 
 const char *examplestring[] = {"T:800,100", "P:150", "T:1000,100", "P:150", "T:1200,100", "P:150", "S:2200,1000,10,5", "N:100,200,5,15,700"};
 
