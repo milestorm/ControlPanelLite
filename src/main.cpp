@@ -214,6 +214,12 @@ const char *sfxGunCmd[] = {"N:100,200,5,15,200", "S:2200,900,50,12"};
 // wolf3d sound, lol
 const char *sfxBlastCmd[] = {"N:400,500,5,15,50", "N:300,400,5,15,75", "N:200,300,5,15,100", "N:100,200,5,15,125"};
 
+const char *sfxWolfAmmoCmd[] = {"T:587,170", "P:30", "T:988,50", "P:30", "T:988,50", "P:30", "T:988,50"};
+
+
+const char *testCmd[] = {"V:831,415,20,200", "V:1047,415,20,200", "V:1245,415,20,200"};
+
+
 ToneSfx toneSfx(BUZZER);
 
 
@@ -651,7 +657,7 @@ void processPush(int buttonId) {
     }
     if (buttonId == 3) {
       toneSfx.setInfinite(false);
-      toneSfx.play(sfxBlastCmd, sizeof(sfxBlastCmd) / sizeof(sfxBlastCmd[0]));
+      toneSfx.play(testCmd, sizeof(testCmd) / sizeof(testCmd[0]));
     }
     break;
 

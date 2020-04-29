@@ -59,7 +59,8 @@ class ToneSfx {
         int step;
         int minDuration;
         int maxDuration;
-        int noiseDuration;
+        int effectDuration;
+        bool vibratoFirst = true;
 
         VirtualDelay soundDelay, soundDelay2;
 
