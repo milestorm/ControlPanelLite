@@ -86,6 +86,20 @@ __Example__
 
 ---
 
+#### Trill
+Plays two sounds in sequence for a time. If delay is fast, it sounds like trill
+
+__`I:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
+* firstFreq: first frequency to play
+* secondFreq: second frequency to play
+* toneDuration: duration one played tone
+* effectDuration: duration of whole trill sound
+
+__Example__
+`I:440,880,5,1000` - trills A4 and A5 notes in 5 ms intervals for 1000 ms
+
+---
+
 
 ### Constants
 `tones.h` includes a list of available constants for notes and their frequencies in Hz. For example, `NOTE_A4`.

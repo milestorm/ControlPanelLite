@@ -241,8 +241,8 @@ void ToneSfx::tick() {
             }
 
         }
-        // ***** VIBRATO *****
-        else if (*readValue == 'V' ) {
+        // ***** TRILL *****
+        else if (*readValue == 'I' ) {
             readValue++; readValue++; // skip V:
             // read firstFreq
             num = 0;
@@ -338,7 +338,7 @@ void ToneSfx::tick() {
             }
             break;
 
-        case 4: // ***** VIBRATO *****
+        case 4: // ***** TRILL *****
             tone(pin, frequency, duration);
             soundDelay.start(duration);
             soundDelay2.start(effectDuration);
