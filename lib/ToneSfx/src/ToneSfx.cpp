@@ -228,18 +228,54 @@ void ToneSfx::tick() {
             else { // NOISE
                 readValue++; // skip colon
 
-                // read maxDuration
+                // read effectDuration
                 num = 0;
                 while(isdigit(*readValue)) {
                     num = (num * 10) + (*readValue++ - '0');
                 }
-                noiseDuration = num;
+                effectDuration = num;
 
                 frequency = this->randomGenerator(freqStart, freqEnd);
                 duration = this->randomGenerator(minDuration, maxDuration);
                 commandType = 3;
             }
 
+        }
+        // ***** VIBRATO *****
+        else if (*readValue == 'V' ) {
+            readValue++; readValue++; // skip V:
+            // read firstFreq
+            num = 0;
+            while(isdigit(*readValue)) {
+                num = (num * 10) + (*readValue++ - '0');
+            }
+            freqStart = num;
+            readValue++; // skip colon
+
+            // read secondFreq
+            num = 0;
+            while(isdigit(*readValue)) {
+                num = (num * 10) + (*readValue++ - '0');
+            }
+            freqEnd = num;
+            readValue++; // skip colon
+
+            // read duration
+            num = 0;
+            while(isdigit(*readValue)) {
+                num = (num * 10) + (*readValue++ - '0');
+            }
+            duration = num;
+            readValue++; // skip colon
+
+            // read effectDuration
+            num = 0;
+            while(isdigit(*readValue)) {
+                num = (num * 10) + (*readValue++ - '0');
+            }
+            effectDuration = num;
+
+            commandType = 4;
         }
 
         // tone generation
@@ -289,11 +325,32 @@ void ToneSfx::tick() {
         case 3: // ***** NOISE *****
             tone(pin, frequency, duration);
             soundDelay.start(duration);
-            soundDelay2.start(noiseDuration);
+            soundDelay2.start(effectDuration);
             if(soundDelay.elapsed()) {
 
                 frequency = this->randomGenerator(freqStart, freqEnd);
                 duration = this->randomGenerator(minDuration, maxDuration);
+
+                if (soundDelay2.elapsed()) {
+                    readCommand = false;
+                    commandType = -1;
+                }
+            }
+            break;
+
+        case 4: // ***** VIBRATO *****
+            tone(pin, frequency, duration);
+            soundDelay.start(duration);
+            soundDelay2.start(effectDuration);
+            if(soundDelay.elapsed()) {
+
+                if (vibratoFirst) {
+                    frequency = freqStart;
+                    vibratoFirst = false;
+                } else {
+                    frequency = freqEnd;
+                    vibratoFirst = true;
+                }
 
                 if (soundDelay2.elapsed()) {
                     readCommand = false;
