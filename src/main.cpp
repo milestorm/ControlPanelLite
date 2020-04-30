@@ -207,6 +207,7 @@ DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
 DotMatrixAnimation animation_gun(ANIM_gun, ANIM_gun_len, 30);
 
 
+const char *sfxComputerSoundCmd[] = {"N:10,2000,50,120,1000", SFX_END};
 
 const char *sfxBombCmd[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500", SFX_END};
 const char *sfxSirenCmd[] = {"S:880,1650,50,10", "S:1650,880,50,10", SFX_REPEAT};
@@ -222,7 +223,7 @@ const char *sfxWolfGunshot[] = {"T:784,7", "T:523,22", "P:7", "T:587,29", "P:7",
 const char *melodyStart[] = {"I:523,659,15,200", "I:659,784,15,200", "P:100", "I:698,1047,15,100", "P:50", "I:784,988,15,100", "P:50","I:784,1047,15,100", SFX_END};
 
 
-const char *testCmd[] = {"I:523,659,15,200", "I:659,784,15,200", "P:100", "I:698,1047,15,100", "P:50", "I:784,988,15,100", "P:50","I:784,1047,15,100", SFX_END};
+const char *testCmd[] = {"N:10,2000,50,120,1000", SFX_REPEAT};
 
 
 
