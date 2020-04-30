@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <avr/wdt.h>
 #include <config.h>
 #include <matrixchars.h>
 #include <tones.h>
@@ -701,10 +702,17 @@ void butt3Click() {
 	processPush(3);
 }
 
+
+[[noreturn]] void reset() {
+  wdt_enable(WDTO_15MS);
+  for (;;){}
+}
+
 // -----------------------------------------
 // SETUP
 // ------------------------------------------
 void setup() {
+  MCUSR = 0;
   Serial.begin(9600);
   Serial.println("Starting...");
 
@@ -747,6 +755,14 @@ void setup() {
 // --------------------------------------
 
 void loop() {
+  if(
+      !digitalRead(BUTTON_RED)
+      && !digitalRead(BUTTON_GREEN)
+      && !digitalRead(BUTTON_BLUE)
+      && !digitalRead(BUTTON_YELLOW)
+      ){
+    reset();
+  }
   switch (gameType){
   case 1:
     // loop for simon
