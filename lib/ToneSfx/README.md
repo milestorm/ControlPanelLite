@@ -22,7 +22,7 @@ Assigns pin for playing tone, tone commands chain array, and computes size of ch
 These commands are used in command array to create sounds
 
 #### Required commands
-These one of those commands must be at the end of the command array.
+One of those commands must be at the end of the command array.
 
 __SFX_END__ - sound plays only one time
 
@@ -38,6 +38,7 @@ __`T:frequency,duration`__
 * duration: duration of tone
 
 *__Example__*
+
 `T:440:500` - plays tone of 440 Hz for 500 ms
 
 ---
@@ -49,6 +50,7 @@ __`P:duration`__
 * duration: duration of silence
 
 *__Example__*
+
 `P:1000` - pauses playback for 1000 ms
 
 ---
@@ -63,6 +65,7 @@ __`S:startFrequency,endFrequency,step,duration`__
 * duration: duration of sweep effect (ms)
 
 *__Example__*
+
 `S:2200,1000,10,5` - plays up-down sweep sound like falling missile
 
 ---
@@ -75,6 +78,7 @@ __`R:minFrequency,maxFrequency,minDuration,maxDuration`__
 * minDuration, maxDuration: interval from which will be randomly choosed duration of a tone
 
 *__Example__*
+
 `R:1000,2000,100,500` - plays random tone from 1000 to 2000 Hz, durating 100 to 500 ms
 
 ---
@@ -88,6 +92,7 @@ __`N:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
 * effectDuration: duration of random tones
 
 *__Example__*
+
 `N:100,200,5,15,1000` - plays low noise for 1000 ms
 
 ---
@@ -102,17 +107,17 @@ __`I:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
 * effectDuration: duration of whole trill sound
 
 *__Example__*
+
 `I:440,880,5,1000` - trills A4 and A5 notes in 5 ms intervals for 1000 ms
 
 ---
 
-
-### Constants
-`tones.h` includes a list of available constants for notes and their frequencies in Hz. For example, `NOTE_A4`.
-
 ### Example
 Play simple "missile" sound effect on pin 13
 ```
+#include <Arduino.h>
+#include <ToneSfx.h>
+
 int soundPin = 13
 const char *myToneCommands[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500", SFX_END};
 
