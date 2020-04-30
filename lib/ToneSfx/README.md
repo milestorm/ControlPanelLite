@@ -28,6 +28,8 @@ __SFX_END__ - sound plays only one time
 
 __SFX_REPEAT__ - sound plays indefinitely, until `stop()` or `play()` is called
 
+---
+
 #### Tone
 Plays tone for a time
 
