@@ -80,17 +80,26 @@ bool ToneSfx::isPlaying() {
     return playing;
 }
 
-void ToneSfx::setInfinite(bool value) {
-    infinitePlayback = value;
-}
-
 void ToneSfx::setSeedPin(int pin) {
     seedPin = pin;
   }
 
-void ToneSfx::play(const char **_inputArray, int _inputArrayLength) {
+void ToneSfx::play(const char **_inputArray) {
+    int iterator = 0;
     inputArray = _inputArray;
-    inputArrayLength = _inputArrayLength;
+
+    // determines length of input array and infinte playback
+    while (strcmp(inputArray[iterator], "END") != 0 && strcmp(inputArray[iterator], "REP") != 0 ) {
+        iterator++;
+        inputArrayLength = iterator;
+
+        if (strcmp(inputArray[iterator], "REP") == 0 ) {
+            infinitePlayback = true;
+        } else {
+            infinitePlayback = false;
+        }
+    }
+
     playing = true;
     // TODO: here maybe reset the playback with each start?
 }

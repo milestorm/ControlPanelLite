@@ -25,14 +25,16 @@ from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 #include <Arduino.h>
 #include "../lib/VirtualDelay/avdweb_VirtualDelay.h"
 
+#define SFX_END "END"
+#define SFX_REPEAT "REP"
+
 class ToneSfx {
     public:
         ToneSfx(int _pin);
         ToneSfx() {};
         bool isPlaying();
-        void setInfinite(bool value = true);
         void setSeedPin(int pin);
-        void play(const char **_inputArray, int _inputArrayLength);
+        void play(const char **_inputArray);
         void stop();
         void tick();
 
