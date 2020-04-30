@@ -23,7 +23,9 @@ ToneSfx::ToneSfx(int _pin) {
     pin = _pin;
 }
 
-// Seed generator from ADC pin (pins A6 and A7 on NANO)
+/*
+Seed generator from ADC pin (pins A6 and A7 on NANO)
+*/
 uint32_t ToneSfx::get_seed(int pin) {
 
     uint16_t aread;
@@ -59,7 +61,9 @@ uint32_t ToneSfx::get_seed(int pin) {
     return(seed.as_uint32_t);
 }
 
-
+/*
+Generates random number from @param min to @param max
+*/
 int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
     static bool rndGenFirst = true;
     if (rndGenFirst) {
@@ -76,14 +80,23 @@ int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
     return min + random() % (( max + 1 ) - min);
 }
 
+/*
+Returns true if sound is playing
+*/
 bool ToneSfx::isPlaying() {
     return playing;
 }
 
+/*
+Sets analog pin for random seeding. If you use this, use it in setup()
+*/
 void ToneSfx::setSeedPin(int pin) {
     seedPin = pin;
   }
 
+/*
+Plays the sound defined in @param _inputArray
+*/
 void ToneSfx::play(const char **_inputArray) {
     int iterator = 0;
     inputArray = _inputArray;
@@ -104,11 +117,17 @@ void ToneSfx::play(const char **_inputArray) {
     // TODO: here maybe reset the playback with each start?
 }
 
+/*
+Stops the sound
+*/
 void ToneSfx::stop() {
     noTone(pin);
     playing = false;
 }
 
+/*
+Watcher. Must be placed in loop() function.
+*/
 void ToneSfx::tick() {
     if (playing) {
         // reads value from array once
