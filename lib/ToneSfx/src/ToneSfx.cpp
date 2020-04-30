@@ -13,7 +13,7 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at
 http://www.gnu.org/licenses .
 
-This libraryvuses VirtualDelay library
+This library uses VirtualDelay library
 from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 */
 
@@ -23,7 +23,9 @@ ToneSfx::ToneSfx(int _pin) {
     pin = _pin;
 }
 
-// Seed generator from ADC pin (pins A6 and A7 on NANO)
+/*
+Seed generator from ADC pin (pins A6 and A7 on NANO)
+*/
 uint32_t ToneSfx::get_seed(int pin) {
 
     uint16_t aread;
@@ -59,7 +61,9 @@ uint32_t ToneSfx::get_seed(int pin) {
     return(seed.as_uint32_t);
 }
 
-
+/*
+Generates random number from @param min to @param max
+*/
 int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
     static bool rndGenFirst = true;
     if (rndGenFirst) {
@@ -76,30 +80,54 @@ int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
     return min + random() % (( max + 1 ) - min);
 }
 
+/*
+Returns true if sound is playing
+*/
 bool ToneSfx::isPlaying() {
     return playing;
 }
 
-void ToneSfx::setInfinite(bool value) {
-    infinitePlayback = value;
-}
-
+/*
+Sets analog pin for random seeding. If you use this, use it in setup()
+*/
 void ToneSfx::setSeedPin(int pin) {
     seedPin = pin;
   }
 
-void ToneSfx::play(const char **_inputArray, int _inputArrayLength) {
+/*
+Plays the sound defined in @param _inputArray
+*/
+void ToneSfx::play(const char **_inputArray) {
+    int iterator = 0;
     inputArray = _inputArray;
-    inputArrayLength = _inputArrayLength;
+
+    // determines length of input array and infinte playback
+    while (strcmp(inputArray[iterator], "END") != 0 && strcmp(inputArray[iterator], "REP") != 0 ) {
+        iterator++;
+        inputArrayLength = iterator;
+
+        if (strcmp(inputArray[iterator], "REP") == 0 ) {
+            infinitePlayback = true;
+        } else {
+            infinitePlayback = false;
+        }
+    }
+
     playing = true;
     // TODO: here maybe reset the playback with each start?
 }
 
+/*
+Stops the sound
+*/
 void ToneSfx::stop() {
     noTone(pin);
     playing = false;
 }
 
+/*
+Watcher. Must be placed in loop() function.
+*/
 void ToneSfx::tick() {
     if (playing) {
         // reads value from array once
@@ -241,8 +269,8 @@ void ToneSfx::tick() {
             }
 
         }
-        // ***** VIBRATO *****
-        else if (*readValue == 'V' ) {
+        // ***** TRILL *****
+        else if (*readValue == 'I' ) {
             readValue++; readValue++; // skip V:
             // read firstFreq
             num = 0;
@@ -338,7 +366,7 @@ void ToneSfx::tick() {
             }
             break;
 
-        case 4: // ***** VIBRATO *****
+        case 4: // ***** TRILL *****
             tone(pin, frequency, duration);
             soundDelay.start(duration);
             soundDelay2.start(effectDuration);
