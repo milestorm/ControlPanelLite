@@ -13,7 +13,7 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at
 http://www.gnu.org/licenses .
 
-This libraryvuses VirtualDelay library
+This library uses VirtualDelay library
 from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 */
 

@@ -3,6 +3,8 @@
 ## Description
 This is an Arduino Library, which uses tone to create chain of non-blocking sound effects.
 
+This library uses [VirtualDelay](http://www.avdweb.nl/arduino/libraries/virtualdelay.html) for handling non-blocking behavior.
+
 ## Library Usage
 ### Instantiation/Creation
 `ToneSfx tone1(pin);`
