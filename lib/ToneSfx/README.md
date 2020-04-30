@@ -100,7 +100,7 @@ __`N:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
 #### Trill
 Plays two sounds in sequence for a time. If delay is fast, it sounds like trill
 
-__`I:minFrequency,maxFrequency,minDuration,maxDuration,effectDuration`__
+__`I:firstFreq,secondFreq,toneDuration,effectDuration`__
 * firstFreq: first frequency to play
 * secondFreq: second frequency to play
 * toneDuration: duration one played tone
