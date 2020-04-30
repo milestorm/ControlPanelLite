@@ -13,7 +13,7 @@ WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License at
 http://www.gnu.org/licenses .
 
-This libraryvuses VirtualDelay library
+This library uses VirtualDelay library
 from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 */
 
@@ -25,14 +25,16 @@ from http://www.avdweb.nl/arduino/libraries/virtualdelay.html
 #include <Arduino.h>
 #include "../lib/VirtualDelay/avdweb_VirtualDelay.h"
 
+#define SFX_END "END"
+#define SFX_REPEAT "REP"
+
 class ToneSfx {
     public:
         ToneSfx(int _pin);
         ToneSfx() {};
         bool isPlaying();
-        void setInfinite(bool value = true);
         void setSeedPin(int pin);
-        void play(const char **_inputArray, int _inputArrayLength);
+        void play(const char **_inputArray);
         void stop();
         void tick();
 
