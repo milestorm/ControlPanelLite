@@ -11,6 +11,7 @@
 #include <ToneSfx.h>
 #include <DotMatrixAnimation.h>
 #include <animations.h>
+#include <avr/wdt.h>
 
 /*
 Control Panel Lite by MileStorm
@@ -619,9 +620,17 @@ void butt3Click() {
 }
 
 // -----------------------------------------
+
+[[noreturn]] void reset() {
+  wdt_enable(WDTO_15MS);
+  for (;;){}
+}
+
+// -----------------------------------------
 // SETUP
 // ------------------------------------------
 void setup() {
+  MCUSR = 0;
   Serial.begin(9600);
   Serial.println("Starting...");
 
@@ -661,6 +670,12 @@ void setup() {
 // --------------------------------------
 
 void loop() {
+  // if all four buttons are pressed at once, machine will restart
+  // TODO: does not work in Simon game
+  if (!digitalRead(BUTTON_RED) && !digitalRead(BUTTON_GREEN) && !digitalRead(BUTTON_BLUE) && !digitalRead(BUTTON_YELLOW)){
+    reset();
+  }
+
   switch (gameType){
   case 1:
     // loop for simon
