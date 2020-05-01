@@ -9,6 +9,7 @@
 #include <avr/pgmspace.h>
 #include <avdweb_VirtualDelay.h>
 #include <ToneSfx.h>
+#include <DotMatrixAnimation.h>
 #include <animations.h>
 
 /*
@@ -117,99 +118,12 @@ void printStringWithShift(char* s, int shift_speed){
   }
 }
 
-// non blocking animation class
-class DotMatrixAnimation {
-  bool isAnimating = false;
-
-  const uint64_t *animArray;
-  int animLength;
-  int cyclesCount;
-  int frameDelay;
-
-  bool isInfinite = false;
-
-  // counter helpers
-  int cyclesIndex = 0;
-  int animIndex = 0;
-
-  VirtualDelay animDelay; // initialize virtual delay
-
-  private:
-  void displayImage(uint64_t image) {
-    for (int i = 0; i < 8; i++) {
-      byte row = (image >> i * 8) & 0xFF;
-      for (int j = 0; j < 8; j++) {
-        dot_matrix.setDot(j, i, bitRead(row, j));
-      }
-    }
-  }
-
-  public:
-  DotMatrixAnimation(const uint64_t *_animArray, int _animLength, int _frameDelay = 100){
-    animArray = _animArray;
-    animLength = _animLength;
-    frameDelay = _frameDelay;
-  }
-
-  bool isRunning() {
-    return isAnimating;
-  }
-
-  void setInfinite(bool value = true) {
-    isInfinite = value;
-  }
-
-  void start(int _cyclesCount = 1) {
-    cyclesCount = _cyclesCount;
-    cyclesIndex = 0;
-    isAnimating = true;
-  }
-
-  void stop() {
-    isAnimating = false;
-  }
-
-  void tick() {
-    if (isAnimating == true) {
-      animDelay.start(frameDelay);
-      if (animDelay.elapsed()) {
-
-        uint64_t image;
-
-        memcpy_P(&image, &animArray[this->animIndex], 8);
-        displayImage(image);
-
-        if (animIndex < animLength - 1) {
-          animIndex++;
-        } else {
-          if (isInfinite) {
-            animIndex = 0;
-          } else {
-            if (cyclesIndex == cyclesCount - 1) {
-              isAnimating = false;
-              dot_matrix.clear();
-            }
-            animIndex = 0;
-            cyclesIndex++;
-          }
-
-        }
-
-      }
-    }
-  }
-
-
-
-};
-
-DotMatrixAnimation animation_intro(ANIM_fx2, ANIM_fx2_len);
-DotMatrixAnimation animation_gun(ANIM_gun, ANIM_gun_len, 30);
+DotMatrixAnimation matrixAnimation(dot_matrix);
 
 
 const char *sfxComputerSoundCmd[] = {"N:10,2000,50,120,1000", SFX_END};
 
-const char *sfxBombCmd[] = {"S:2200,1000,25,50", "N:100,200,5,15,1500", SFX_END};
+const char *sfxBombCmd[] = {"S:2200,1000,25,40", "N:100,200,5,15,1300", SFX_END};
 const char *sfxSirenCmd[] = {"S:880,1650,50,10", "S:1650,880,50,10", SFX_REPEAT};
 const char *sfxGunCmd[] = {"N:100,200,5,15,200", "S:2200,900,50,12", SFX_END};
 // wolf3d sound, lol
@@ -225,7 +139,7 @@ const char *melodyStart[] = {"I:523,659,15,200", "I:659,784,15,200", "P:100", "I
 
 const char *testCmd[] = {"N:10,2000,50,120,1000", SFX_REPEAT};
 
-
+//TODO: udelat v sfx knihovnne prehravac pres seriovej port
 
 ToneSfx toneSfx(BUZZER);
 
@@ -585,7 +499,7 @@ void processPush(int buttonId) {
     switch (buttonId){
     case 0:
       // easy buttons game
-      animation_intro.stop();
+      matrixAnimation.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_easybuttons, text_speed);
       writeScore(buttonGameScore, false);
@@ -594,21 +508,21 @@ void processPush(int buttonId) {
 
     case 1:
       // simon
-      animation_intro.stop();
+      matrixAnimation.stop();
       turnOffAllLeds();
       play_intro();
       break;
 
     case 2:
       // sound board
-      animation_intro.stop();
+      matrixAnimation.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_soundboard, text_speed);
       break;
 
     case 3:
       // timed buttons game
-      animation_intro.stop();
+      matrixAnimation.stop();
       turnOffAllLeds();
       printStringWithShift(start_message_timedbuttons, text_speed);
       break;
@@ -650,16 +564,19 @@ void processPush(int buttonId) {
   case 2:
     // sound board
     if (buttonId == 0) {
+      matrixAnimation.play(ANIM_beacon, ANIM_beacon_len, 1, true, 50);
       toneSfx.play(sfxSirenCmd);
     }
     if (buttonId == 1) {
-      animation_gun.start();
+      matrixAnimation.play(ANIM_laser, ANIM_laser_len, 1, false, 50);
       toneSfx.play(sfxGunCmd);
     }
     if (buttonId == 2) {
+      matrixAnimation.play(ANIM_bomb, ANIM_bomb_len, 1, false, 200);
       toneSfx.play(sfxBombCmd);
     }
     if (buttonId == 3) {
+      matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, true, 30);
       toneSfx.play(testCmd);
     }
     break;
@@ -712,14 +629,11 @@ void setup() {
 
   dot_matrix.init(); // module initialize
   dot_matrix.setIntensity(3); // dot matix intensity 0-15
-  // bootup
-  turnOnAllLeds();
 
-  animation_intro.setInfinite();
-  animation_intro.start();
-  //tone(BUZZER, NOTE_E5, 100);
-  //delay(100);
-  //tone(BUZZER, NOTE_E6, 400);
+  // bootup
+  matrixAnimation.play(ANIM_fx2, ANIM_fx2_len, 1, true);
+  toneSfx.play(melodyStart);
+
   flashAllLeds();
 
 	for (int i = 0; i < 4; i++){
@@ -782,8 +696,7 @@ void loop() {
       myLeds[i].tick();
     }
 
-    animation_gun.tick();
-    animation_intro.tick();
+    matrixAnimation.tick();
     toneSfx.tick();
     break;
   }
