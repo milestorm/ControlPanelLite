@@ -155,7 +155,7 @@ const uint64_t ANIM_random[] PROGMEM = {
 };
 const int ANIM_random_len = sizeof(ANIM_random)/8;
 
-const uint64_t ANIM_scanner[] = {
+const uint64_t ANIM_scanner[] PROGMEM = {
   0x00000000000000ff,
   0x000000000000ff00,
   0x0000000000FF0000,
