@@ -52,7 +52,6 @@ class DotMatrixAnimation {
     public:
         DotMatrixAnimation(MaxMatrix &dotMatrix);
         DotMatrixAnimation() {};
-        void setFrameDelay(int value);
         bool isRunning();
         void play(const uint64_t *animArray, int animLength, int cyclesCount = 1, bool isInfinite = false, int frameDelay = 100);
         void stop();

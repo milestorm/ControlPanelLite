@@ -37,10 +37,6 @@ void DotMatrixAnimation::displayImage(uint64_t image) {
     }
 }
 
-void DotMatrixAnimation::setFrameDelay(int value) {
-    this->frameDelay = value;
-}
-
 bool DotMatrixAnimation::isRunning() {
     return this->isAnimating;
 }

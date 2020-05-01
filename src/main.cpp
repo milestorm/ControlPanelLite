@@ -602,6 +602,7 @@ void butt3Click() {
 
 // -----------------------------------------
 
+// reset arduino
 [[noreturn]] void reset() {
   wdt_enable(WDTO_15MS);
   for (;;){}
