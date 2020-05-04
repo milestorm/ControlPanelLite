@@ -842,6 +842,9 @@ void butt3LongPress() {
 	processLongPress(3);
 }
 
+// ---------------------------------------------
+// ------- Intro callback fn -------------------
+
 void introAnim1() {
   matrixAnimation.play(ANIM_fx2, ANIM_fx2_len, 1, true);
 }

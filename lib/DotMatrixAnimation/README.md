@@ -16,12 +16,17 @@ Where `dot_matrix` is MaxMatrix instance
 
 ### Methods
 * `isRunning()` - Returns true if animation is playing, false if not.
-* `play(animArray, animLength, cyclesCount, isInfinite, frameDelay)` - plays animation
+* `play(animArray, animLength, [cyclesCount], [isInfinite], [frameDelay], [callbackFn])` - plays animation
     * `animArray` - Animation sequence generated from the editor. See upwards. __This value MUST be stored in PROGMEM__
     * `animLength` - Length of the sequence. Also generated from the editor.
     * `cyclesCount` - _OPTIONAL_ How many times will animation repeat. __Default is 1__
     * `isInfinite` - _OPTIONAL_ If set to true, animation will be infinite. Can be stopped with `stop()`. __Default is FALSE__
     * `frameDelay` - _OPTIONAL_ Sets the delay in ms between frames. Lower value is faster animation. __Default is 100__
+    * `callbackFn` - _OPTIONAL_ Callback function, which is fired after the animation ends.
+* `stillFrame(animArray, frameDelay, [frameIndex], [callbackFn])` - Displays still frame (image) from animation sequence for the specified duration.
+    * `animArray` - Animation sequence generated from the editor. See upwards. __This value MUST be stored in PROGMEM__
+    * `frameDelay` - Duration of the displayed frame (image)
+    * `callbackFn` - _OPTIONAL_ Callback function, which is fired after the `frameDelay` timer ends.
 * `stop()` - Stops animation
 * `tick()` - Watcher. Must be placed in `loop()` function.
 
