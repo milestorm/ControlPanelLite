@@ -5,7 +5,7 @@ Sound effect definitions
 */
 
 // intro melody
-;const char *melodyStart[] = {"I:523,659,15,200", "I:659,784,15,200", "P:100", "I:698,1047,15,100", "P:50", "I:784,988,15,100", "P:50","I:784,1047,15,100", SFX_END};
+const char *melodyStart[] = {"I:523,659,15,200", "I:659,784,15,200", "P:100", "I:698,1047,15,100", "P:50", "I:784,988,15,100", "P:50","I:784,1047,15,100", SFX_END};
 
 
 // BANK 0 - retro sounds

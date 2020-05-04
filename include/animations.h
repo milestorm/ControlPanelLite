@@ -252,4 +252,4 @@ const uint64_t ANIM_notes[] PROGMEM = {
   0x0207267464444040,
   0x0227766444444000
 };
-const int ANIM_notes_len = sizeof(ANIM_notes)/8
+const int ANIM_notes_len = sizeof(ANIM_notes)/8;
