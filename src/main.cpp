@@ -953,10 +953,3 @@ void loop() {
     break;
   }
 }
-
-// TODO:
-/*
-u soundboardu udelat naky animace s virtualdelay
-array framu, ktery se zobrazej spolu se zvukem, kterej bude taky pres virtual delay
-efektu a animaci by bylo 8, protoze press a longpress
-*/
