@@ -17,6 +17,7 @@ Assigns pin for playing tone, tone commands chain array, and computes size of ch
 * `isPlaying()` - Returns true if tone is playing, false if not.
 * `setSeedPin(pin)` - You can modify the analog pin for creating random seed. Default pin for random seed is set to `A0`.
 * `play(myToneCommands)` - Non-blocking function. Starts the sound inputted by the commands array in `myToneCommands`.
+* `mute(value)` - If set to true, no tones will be produced. Default is false.
 * `stop()` - Stop playing tone.
 * `tick()` - Watcher. Must be placed in `loop()` function.
 

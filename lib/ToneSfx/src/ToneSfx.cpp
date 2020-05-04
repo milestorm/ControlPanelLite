@@ -81,6 +81,13 @@ int ToneSfx::randomGenerator(int min, int max) { // range : [min, max)
 }
 
 /*
+Produces no sound, if muted is set to true
+*/
+void ToneSfx::mute(bool value) {
+    muted = value;
+}
+
+/*
 Returns true if sound is playing
 */
 bool ToneSfx::isPlaying() {
@@ -309,7 +316,9 @@ void ToneSfx::tick() {
         // tone generation
         switch (commandType) {
         case 0: // ***** TONE, RANDOM TONE *****
-            tone(pin, frequency, duration);
+            if(!muted) {
+                tone(pin, frequency, duration);
+            }
             soundDelay.start(duration);
             if(soundDelay.elapsed()) {
                 readCommand = false;
@@ -318,7 +327,9 @@ void ToneSfx::tick() {
             break;
 
         case 1: // ***** PAUSE *****
-            noTone(pin);
+            if(!muted) {
+                noTone(pin);
+            }
             soundDelay.start(duration);
             if(soundDelay.elapsed()) {
                 readCommand = false;
@@ -327,7 +338,9 @@ void ToneSfx::tick() {
             break;
 
         case 2: // ***** SWEEP *****
-            tone(pin, frequency, duration);
+            if(!muted) {
+                tone(pin, frequency, duration);
+            }
             soundDelay.start(duration);
             if(soundDelay.elapsed()) {
 
@@ -351,7 +364,9 @@ void ToneSfx::tick() {
             break;
 
         case 3: // ***** NOISE *****
-            tone(pin, frequency, duration);
+            if(!muted) {
+                tone(pin, frequency, duration);
+            }
             soundDelay.start(duration);
             soundDelay2.start(effectDuration);
             if(soundDelay.elapsed()) {
@@ -367,7 +382,9 @@ void ToneSfx::tick() {
             break;
 
         case 4: // ***** TRILL *****
-            tone(pin, frequency, duration);
+            if(!muted) {
+                tone(pin, frequency, duration);
+            }
             soundDelay.start(duration);
             soundDelay2.start(effectDuration);
             if(soundDelay.elapsed()) {

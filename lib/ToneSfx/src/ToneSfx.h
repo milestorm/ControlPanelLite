@@ -34,6 +34,7 @@ class ToneSfx {
         ToneSfx() {};
         bool isPlaying();
         void setSeedPin(int pin);
+        void mute(bool value);
         void play(const char **_inputArray);
         void stop();
         void tick();
@@ -63,6 +64,8 @@ class ToneSfx {
         int maxDuration;
         int effectDuration;
         bool vibratoFirst = true;
+
+        bool muted = false;
 
         VirtualDelay soundDelay, soundDelay2;
 
