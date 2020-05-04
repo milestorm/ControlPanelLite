@@ -76,8 +76,16 @@ char start_message_timedbuttons[] =    " Timed Buttons   ";
 char start_message_simon[] =    " Simon says   ";
 char start_message_soundboard[] =    " Soundboard   ";
 
+char message_bank0[] = " Retro sounds   ";
+char message_bank1[] = " Wolf 3D sounds   ";
+char message_bank2[] = " Melody tones   ";
+char message_bank3[] = " -not ready yet-   ";
+
 // gameType: menu -1, easybutton 0, simon 1, soundboard 2,  timedbutton 3
 int gameType = -1;
+
+// ID of soundbank selected by longpress of buttons in soundbank
+int soundboardBank = 0;
 
 // ----------------------------------------------------------------
 // misc functions
@@ -466,11 +474,182 @@ void attractMode(void)
 
 // button handler
 
+void processLongPress(int buttonId) {
+  switch (gameType) {
+  case -1:
+    // main menu
+    switch (buttonId) {
+    case 0:
+      // RED button
+
+      break;
+
+    case 1:
+      // GREEN button
+
+      break;
+
+    case 2:
+      // BLUE button
+
+      break;
+
+    case 3:
+      // YELLOW button
+
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
+  case 0:
+    // easy buttons game
+    switch (buttonId) {
+    case 0:
+      // RED button
+
+      break;
+
+    case 1:
+      // GREEN button
+
+      break;
+
+    case 2:
+      // BLUE button
+
+      break;
+
+    case 3:
+      // YELLOW button
+
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
+  case 1:
+    // simon
+    switch (buttonId) {
+    case 0:
+      // RED button
+
+      break;
+
+    case 1:
+      // GREEN button
+
+      break;
+
+    case 2:
+      // BLUE button
+
+      break;
+
+    case 3:
+      // YELLOW button
+
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
+  case 2:
+    // sound board
+    switch (buttonId) {
+    case 0:
+      // RED button
+      soundboardBank = 0;
+      matrixAnimation.stop();
+      turnOffAllLeds();
+      printStringWithShift(message_bank0, text_speed);
+
+      break;
+
+    case 1:
+      // GREEN button
+      soundboardBank = 1;
+      matrixAnimation.stop();
+      turnOffAllLeds();
+      printStringWithShift(message_bank1, text_speed);
+
+      break;
+
+    case 2:
+      // BLUE button
+      soundboardBank = 2;
+      matrixAnimation.stop();
+      turnOffAllLeds();
+      printStringWithShift(message_bank2, text_speed);
+
+      break;
+
+    case 3:
+      // YELLOW button
+      soundboardBank = 3;
+      matrixAnimation.stop();
+      turnOffAllLeds();
+      printStringWithShift(message_bank3, text_speed);
+
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
+  case 3:
+    // timed buttons game
+    switch (buttonId) {
+    case 0:
+      // RED button
+
+      break;
+
+    case 1:
+      // GREEN button
+
+      break;
+
+    case 2:
+      // BLUE button
+
+      break;
+
+    case 3:
+      // YELLOW button
+
+      break;
+
+    default:
+      break;
+    }
+
+    break;
+
+  default:
+    break;
+  }
+}
+
+// handler for button click
 void processPush(int buttonId) {
-  Serial.print("ButtonID: ");
-  Serial.println(buttonId);
-  Serial.print("GameType: ");
-  Serial.println(gameType);
+  if (DEBUG) {
+    Serial.print("ButtonID click: ");
+    Serial.println(buttonId);
+    Serial.print("GameType: ");
+    Serial.println(gameType);
+  }
 
   switch (gameType){
   case -1:
@@ -545,22 +724,65 @@ void processPush(int buttonId) {
 
   case 2:
     // sound board
-    if (buttonId == 0) {
-      matrixAnimation.play(ANIM_beacon, ANIM_beacon_len, 1, true, 50);
-      toneSfx.play(sfxSirenCmd);
+    switch (soundboardBank) {
+    case 0:
+      switch (buttonId) {
+      case 0:
+        matrixAnimation.play(ANIM_beacon, ANIM_beacon_len, 1, true, 50);
+        toneSfx.play(sfxSirenCmd);
+        break;
+      case 1:
+        matrixAnimation.play(ANIM_laser, ANIM_laser_len, 1, false, 50);
+        toneSfx.play(sfxGunCmd);
+        break;
+      case 2:
+        matrixAnimation.play(ANIM_bomb, ANIM_bomb_len, 1, false, 200);
+        toneSfx.play(sfxBombCmd);
+        break;
+      case 3:
+        matrixAnimation.play(ANIM_random, ANIM_random_len, 1, true, 30);
+        toneSfx.play(testCmd);
+        break;
+      default:
+        break;
+      }
+      break;
+
+    case 1:
+      switch (buttonId) {
+      case 0:
+        matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, false, 30);
+        toneSfx.play(sfxWolfGunshot);
+        break;
+      case 1:
+        matrixAnimation.play(ANIM_scanner, ANIM_scanner_len, 1, false, 2);
+        toneSfx.play(sfxWolfOneUpCmd);
+        break;
+      case 2:
+        matrixAnimation.play(ANIM_random, ANIM_random_len, 1, false, 70);
+        toneSfx.play(sfxWolfAmmoCmd);
+        break;
+      case 3:
+        matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, false, 120);
+        toneSfx.play(sfxWolfGobletPickupCmd);
+        break;
+      default:
+        break;
+      }
+      break;
+
+    case 2:
+      /* code */
+      break;
+
+    case 3:
+      /* code */
+      break;
+
+    default:
+      break;
     }
-    if (buttonId == 1) {
-      matrixAnimation.play(ANIM_laser, ANIM_laser_len, 1, false, 50);
-      toneSfx.play(sfxGunCmd);
-    }
-    if (buttonId == 2) {
-      matrixAnimation.play(ANIM_bomb, ANIM_bomb_len, 1, false, 200);
-      toneSfx.play(sfxBombCmd);
-    }
-    if (buttonId == 3) {
-      matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, true, 30);
-      toneSfx.play(testCmd);
-    }
+
     break;
 
   case 3:
@@ -600,6 +822,30 @@ void butt3Click() {
 	processPush(3);
 }
 
+// RED
+void butt0LongPress() {
+	processLongPress(0);
+}
+
+// GREEN
+void butt1LongPress() {
+	processLongPress(1);
+}
+
+// BLUE
+void butt2LongPress() {
+	processLongPress(2);
+}
+
+// YELLOW
+void butt3LongPress() {
+	processLongPress(3);
+}
+
+void longPressStart1() {
+  Serial.println("Button 1 longPress start");
+} // longPressStart1
+
 // -----------------------------------------
 
 // reset arduino
@@ -627,14 +873,15 @@ void setup() {
 
   flashAllLeds();
 
-	for (int i = 0; i < 4; i++){
-		myButtons[i].setPressTicks(60);
-	}
+	myButtons[0].attachClick(butt0Click);
+	myButtons[1].attachClick(butt1Click);
+	myButtons[2].attachClick(butt2Click);
+	myButtons[3].attachClick(butt3Click);
 
-	myButtons[0].attachPress(butt0Click);
-	myButtons[1].attachPress(butt1Click);
-	myButtons[2].attachPress(butt2Click);
-	myButtons[3].attachPress(butt3Click);
+	myButtons[0].attachLongPressStart(butt0LongPress);
+	myButtons[1].attachLongPressStart(butt1LongPress);
+	myButtons[2].attachLongPressStart(butt2LongPress);
+	myButtons[3].attachLongPressStart(butt3LongPress);
 
   pinMode(BUTTON_RED, INPUT_PULLUP);
   pinMode(BUTTON_GREEN, INPUT_PULLUP);
