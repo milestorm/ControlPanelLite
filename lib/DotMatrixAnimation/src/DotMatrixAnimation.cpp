@@ -41,7 +41,7 @@ bool DotMatrixAnimation::isRunning() {
     return this->isAnimating;
 }
 
-void DotMatrixAnimation::play(const uint64_t *animArray, int animLength, int cyclesCount, bool isInfinite, int frameDelay) {
+void DotMatrixAnimation::play(const uint64_t *animArray, int animLength, int cyclesCount, bool isInfinite, int frameDelay, callbackFunction newFunction) {
     this->cyclesCount = cyclesCount;
     this->animArray = animArray;
     this->animLength = animLength;
@@ -50,11 +50,26 @@ void DotMatrixAnimation::play(const uint64_t *animArray, int animLength, int cyc
     this->cyclesIndex = 0;
     this->animIndex = 0;
     this->isAnimating = true;
+    this->isStillFrame = false;
+
+    this->_callbackFunc = newFunction;
 }
 
 void DotMatrixAnimation::stop() {
     this->isAnimating = false;
     this->dotMatrix.clear();
+}
+
+void DotMatrixAnimation::stillFrame(const uint64_t *animArray, int frameDelay, int frameIndex, callbackFunction newFunction) {
+    this->animArray = animArray;
+    this->animIndex = frameIndex;
+    this->frameDelay = frameDelay;
+    this->isAnimating = true;
+    this->isStillFrame = true;
+
+    this->_callbackFunc = newFunction;
+
+    this->displayImage(this->animArray[this->animIndex]);
 }
 
 void DotMatrixAnimation::tick() {
@@ -67,20 +82,31 @@ void DotMatrixAnimation::tick() {
             memcpy_P(&image, &this->animArray[this->animIndex], 8);
             displayImage(image);
 
-            if (this->animIndex < this->animLength - 1) {
-            this->animIndex++;
-            } else {
-                if (this->isInfinite) {
-                    this->animIndex = 0;
+            if (this->isStillFrame) {
+                this->isAnimating = false;
+                this->dotMatrix.clear();
+
+                if (this->_callbackFunc) this->_callbackFunc();
+            }
+            else {
+                if (this->animIndex < this->animLength - 1) {
+                this->animIndex++;
                 } else {
-                    if (this->cyclesIndex == this->cyclesCount - 1) {
-                        this->isAnimating = false;
-                        this->dotMatrix.clear();
+                    if (this->isInfinite) {
+                        this->animIndex = 0;
+                    } else {
+                        if (this->cyclesIndex == this->cyclesCount - 1) {
+                            this->isAnimating = false;
+                            this->dotMatrix.clear();
+
+                            if (this->_callbackFunc) this->_callbackFunc();
+                        }
+                        this->animIndex = 0;
+                        this->cyclesIndex++;
                     }
-                    this->animIndex = 0;
-                    this->cyclesIndex++;
                 }
             }
+
         }
     }
 }

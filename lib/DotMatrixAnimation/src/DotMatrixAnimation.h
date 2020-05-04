@@ -29,9 +29,14 @@ and MaxMatrix library from Oscar Kin-Chung Au
 #include <../lib/MaxMatrix/MaxMatrix.h>
 #include <../lib/VirtualDelay/avdweb_VirtualDelay.h>
 
+extern "C" {
+    typedef void (*callbackFunction)(void);
+}
+
 class DotMatrixAnimation {
     private:
         bool isAnimating = false;
+        bool isStillFrame = false;
 
         const uint64_t *animArray;
         int animLength;
@@ -44,6 +49,8 @@ class DotMatrixAnimation {
         int cyclesIndex = 0;
         int animIndex = 0;
 
+        callbackFunction _callbackFunc = NULL;
+
         VirtualDelay animDelay;
         MaxMatrix dotMatrix;
 
@@ -53,7 +60,8 @@ class DotMatrixAnimation {
         DotMatrixAnimation(MaxMatrix &dotMatrix);
         DotMatrixAnimation() {};
         bool isRunning();
-        void play(const uint64_t *animArray, int animLength, int cyclesCount = 1, bool isInfinite = false, int frameDelay = 100);
+        void play(const uint64_t *animArray, int animLength, int cyclesCount = 1, bool isInfinite = false, int frameDelay = 100, callbackFunction newFunction = NULL);
+        void stillFrame(const uint64_t *animArray, int frameDelay, int frameIndex = 0, callbackFunction newFunction = NULL);
         void stop();
         void tick();
 };

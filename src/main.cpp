@@ -842,9 +842,14 @@ void butt3LongPress() {
 	processLongPress(3);
 }
 
-void longPressStart1() {
-  Serial.println("Button 1 longPress start");
-} // longPressStart1
+void introAnim1() {
+  matrixAnimation.play(ANIM_fx2, ANIM_fx2_len, 1, true);
+}
+
+void introAnim() {
+  toneSfx.play(melodyStart);
+  matrixAnimation.stillFrame(ANIM_ms_logo, 1500, 6, introAnim1);
+}
 
 // -----------------------------------------
 
@@ -859,8 +864,11 @@ void longPressStart1() {
 // ------------------------------------------
 void setup() {
   MCUSR = 0;
+
   Serial.begin(9600);
-  Serial.println("Starting...");
+  if (DEBUG) {
+    Serial.println("ControlPanelLite is booting up...");
+  }
 
   pinMode(BUZZER, OUTPUT);
 
@@ -868,8 +876,8 @@ void setup() {
   dot_matrix.setIntensity(3); // dot matix intensity 0-15
 
   // bootup
-  matrixAnimation.play(ANIM_fx2, ANIM_fx2_len, 1, true);
-  toneSfx.play(melodyStart);
+  matrixAnimation.play(ANIM_ms_logo, ANIM_ms_logo_len, 1, false, 100, introAnim);
+
 
   flashAllLeds();
 

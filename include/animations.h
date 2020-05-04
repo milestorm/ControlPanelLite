@@ -223,3 +223,14 @@ const uint64_t ANIM_FACE_sad[] PROGMEM = {
   0x00423c0066000000
 };
 int ANIM_FACE_sad_length = sizeof(ANIM_FACE_sad)/8;
+
+const uint64_t ANIM_ms_logo[] PROGMEM = {
+  0x0000000000000000,
+  0x00000000000000fd,
+  0x000000000000fd85,
+  0x0000000000fd85f5,
+  0x00000000fd85f511,
+  0x000000fd85f511ff,
+  0x0000fd85f511ff00,
+};
+const int ANIM_ms_logo_len = sizeof(ANIM_ms_logo)/8;
