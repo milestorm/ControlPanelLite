@@ -726,6 +726,7 @@ void processPush(int buttonId) {
     // sound board
     switch (soundboardBank) {
     case 0:
+      // Retro sounds
       switch (buttonId) {
       case 0:
         matrixAnimation.play(ANIM_beacon, ANIM_beacon_len, 1, true, 50);
@@ -749,6 +750,7 @@ void processPush(int buttonId) {
       break;
 
     case 1:
+      // Wolf 3D sounds
       switch (buttonId) {
       case 0:
         matrixAnimation.stillFrame(STILL_wolf_icons, 750, 0);
@@ -772,7 +774,27 @@ void processPush(int buttonId) {
       break;
 
     case 2:
-      /* code */
+      // melody
+      switch (buttonId) {
+      case 0:
+        matrixAnimation.play(ANIM_notes, ANIM_notes_len, 1, false, 50);
+        toneSfx.play(toneAC);
+        break;
+      case 1:
+        matrixAnimation.play(ANIM_notes, ANIM_notes_len, 1, false, 50);
+        toneSfx.play(toneBD);
+        break;
+      case 2:
+        matrixAnimation.play(ANIM_notes, ANIM_notes_len, 1, false, 50);
+        toneSfx.play(toneCE);
+        break;
+      case 3:
+        matrixAnimation.play(ANIM_notes, ANIM_notes_len, 1, false, 50);
+        toneSfx.play(toneEG);
+        break;
+      default:
+        break;
+      }
       break;
 
     case 3:

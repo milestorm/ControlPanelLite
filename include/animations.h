@@ -242,3 +242,14 @@ const uint64_t ANIM_ms_logo[] PROGMEM = {
   0x0000fd85f511ff00,
 };
 const int ANIM_ms_logo_len = sizeof(ANIM_ms_logo)/8;
+
+const uint64_t ANIM_notes[] PROGMEM = {
+  0x0227766444444000,
+  0x0022776644444400,
+  0x0020726746444404,
+  0x0002277664444440,
+  0x0207062474644040,
+  0x0207267464444040,
+  0x0227766444444000
+};
+const int ANIM_notes_len = sizeof(ANIM_notes)/8
