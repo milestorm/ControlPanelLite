@@ -1,5 +1,13 @@
 #include <Arduino.h>
 
+// still frames definition
+const uint64_t STILL_wolf_icons[] PROGMEM = {
+  0x000006067e7d0000,
+  0x3c4299bdbd99423c,
+  0x1e34686868687800,
+  0x3c18182442427e00
+};
+
 // animation definitions
 const uint64_t ANIM_lines[] PROGMEM = {
   0x1818181818181818,

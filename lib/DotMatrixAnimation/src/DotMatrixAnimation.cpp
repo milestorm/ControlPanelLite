@@ -69,7 +69,10 @@ void DotMatrixAnimation::stillFrame(const uint64_t *animArray, int frameDelay, i
 
     this->_callbackFunc = newFunction;
 
-    this->displayImage(this->animArray[this->animIndex]);
+    uint64_t image;
+
+    memcpy_P(&image, &this->animArray[this->animIndex], 8);
+    displayImage(image);
 }
 
 void DotMatrixAnimation::tick() {

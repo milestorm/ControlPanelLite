@@ -751,19 +751,19 @@ void processPush(int buttonId) {
     case 1:
       switch (buttonId) {
       case 0:
-        matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, false, 30);
+        matrixAnimation.stillFrame(STILL_wolf_icons, 750, 0);
         toneSfx.play(sfxWolfGunshot);
         break;
       case 1:
-        matrixAnimation.play(ANIM_scanner, ANIM_scanner_len, 1, false, 2);
+        matrixAnimation.stillFrame(STILL_wolf_icons, 1100, 1);
         toneSfx.play(sfxWolfOneUpCmd);
         break;
       case 2:
-        matrixAnimation.play(ANIM_random, ANIM_random_len, 1, false, 70);
+        matrixAnimation.stillFrame(STILL_wolf_icons, 750, 2);
         toneSfx.play(sfxWolfAmmoCmd);
         break;
       case 3:
-        matrixAnimation.play(ANIM_pulsating, ANIM_pulsating_len, 1, false, 120);
+        matrixAnimation.stillFrame(STILL_wolf_icons, 1400, 3);
         toneSfx.play(sfxWolfGobletPickupCmd);
         break;
       default:
